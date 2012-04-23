@@ -4,7 +4,7 @@ window.onload = function() {
   }
   var width = window.innerWidth;
   var height = window.innerHeight;
-  var aspect = 16 / 9;
+  var aspect = 1.5;
   if (width / aspect > height) {
     width = height * aspect;
   } else {
