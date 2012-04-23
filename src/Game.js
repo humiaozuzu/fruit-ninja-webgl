@@ -42,16 +42,26 @@ Game.prototype = {
   },
 
   _initBackground: function() {
-    var texture = THREE.ImageUtils.loadTexture(
-      'images/background.jpg', THREE.UVMapping
-    );
-    var material = new THREE.MeshBasicMaterial({
-      color: 0xffffff, 
-      map: texture,
-    });
-    var geometry = new THREE.PlaneGeometry(1920, 1080);
-    var mesh = new THREE.Mesh(geometry, material);
-    this.scene.add(mesh);
+    var self = this;
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+
+    var image = new Image();
+    image.onload = function() {
+      var texture = new THREE.Texture(
+        image, 
+        new THREE.UVMapping()
+      );
+      texture.needsUpdate = true;
+      var material = new THREE.MeshBasicMaterial({
+        color: 0xffffff, 
+        map: texture,
+      });
+      var geometry = new THREE.PlaneGeometry(1920, 1080);
+      var mesh = new THREE.Mesh(geometry, material);
+      self.scene.add(mesh);
+    };
+    image.src = 'images/background.jpg';
   },
 
   _initFruits: function() {
@@ -83,10 +93,10 @@ Game.prototype = {
       "models/apple/apple.js",
       "models/banana/banana.js",
       "models/kiwi/kiwi.js",
-      "models/orange/orange.js",
-      "models/pear/pear.js",
-      "models/strawberry/strawbarry.js",
-      "models/watermelon/watermelon.js",
+      //"models/orange/orange.js",
+      //"models/pear/pear.js",
+      //"models/strawberry/strawbarry.js",
+      //"models/watermelon/watermelon.js",
     ];
     models.forEach(function(model) {
       loader.load(model, createFruit);
