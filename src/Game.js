@@ -26,13 +26,13 @@ function Game(opts) {
   // create renderer
   this.renderer = new THREE.WebGLRenderer({ antialias: true });
   this.renderer.setSize(this.width, this.height);
-  container.appendChild(this.renderer.domElement);
+  this.container.appendChild(this.renderer.domElement);
 
   // create stats
   this.stats = new Stats();
   this.stats.domElement.style.position = 'absolute';
   this.stats.domElement.style.top = '0px';
-  container.appendChild(this.stats.domElement);
+  this.container.appendChild(this.stats.domElement);
 
   // register events
   document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
@@ -190,12 +190,14 @@ Game.prototype = {
     var canvas = this._backgroundCanvas;
     var context = canvas.getContext('2d');
 
-    var mouseX = (event.offsetX/ this.width) * 2 - 1;
-    var mouseY = -(event.offsetY/ this.height) * 2 + 1;
+    var mouseX = (x/ this.width) * 2 - 1;
+    var mouseY = -(y/ this.height) * 2 + 1;
+    console.log(x,y)
 
     var vector = new THREE.Vector3( mouseX, mouseY, 0.5 );
     this.projector.unprojectVector( vector, this.camera );
     var scale =  this._backgroundCanvas.width / this.width;
+    console.log(mouseX, mouseY)
 
     context.drawImage(this._juice, 960 + vector.x - this._juice.width / 2, 640 - vector.y - this._juice.width / 2, this._juice.width, this._juice.height);
   },
