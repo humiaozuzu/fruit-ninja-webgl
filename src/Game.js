@@ -3,6 +3,9 @@ function Game(opts) {
   this.height    = opts.height;
   this.container = opts.container;
 
+  // create projector for cordinate transform
+  this.projector = new THREE.Projector();
+
   // create scene
   this.scene = new THREE.Scene();
 
@@ -200,10 +203,11 @@ Game.prototype = {
   },
 
   _hasIntersection: function(event) {
-    var x = (event.offsetX - this.width / 2) * 1920;
-    var y = (event.offsetY- this.height / 2) * 1280;
+    var mouseX = (event.offsetX/ this.width) * 2 - 1;
+    var mouseY = -(event.offsetY/ this.height) * 2 + 1;
 
-    var vector = new THREE.Vector3( x, y, 0);
+    var vector = new THREE.Vector3( mouseX, mouseY, 0.5 );
+    this.projector.unprojectVector( vector, this.camera );
 
     var ray = new THREE.Ray( vector, new THREE.Vector3(0, 0, 1));
 
