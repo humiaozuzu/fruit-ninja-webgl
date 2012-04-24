@@ -3,6 +3,9 @@ function Game(opts) {
   this.height    = opts.height;
   this.container = opts.container;
 
+  // create projector for cordinate transform
+  this.projector = new THREE.Projector();
+
   // create scene
   this.scene = new THREE.Scene();
 
@@ -37,7 +40,7 @@ function Game(opts) {
   console.log(gameScene);
   gameScene.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
 
-  this.controls = new THREE.TrackballControls(this.camera);
+  //this.controls = new THREE.TrackballControls(this.camera);
 }
 
 Game.prototype = {
@@ -162,7 +165,7 @@ Game.prototype = {
   },
 
   _updateCamera: function() {
-    this.controls.update();
+    //this.controls.update();
     this.camera.lookAt(this.scene.position);
   },
 
@@ -174,8 +177,7 @@ Game.prototype = {
   onDocumentMouseDown: function(event) {
     this._needBackgroundUpdate = true;
     event.preventDefault();
-    if (this._isInserted(event)) {
-      console.log(123)
+    if (this._hasIntersection(event)) {
       this._drawSplashedJuice(event.offsetX, event.offsetY);
     }
   },
@@ -188,56 +190,30 @@ Game.prototype = {
     var canvas = this._backgroundCanvas;
     var context = canvas.getContext('2d');
 
+    var mouseX = (event.offsetX/ this.width) * 2 - 1;
+    var mouseY = -(event.offsetY/ this.height) * 2 + 1;
+
+    var vector = new THREE.Vector3( mouseX, mouseY, 0.5 );
+    this.projector.unprojectVector( vector, this.camera );
     var scale =  this._backgroundCanvas.width / this.width;
 
-    context.drawImage(this._juice, x * scale - this._juice.width / 2, y * scale - this._juice.height / 2, this._juice.width, this._juice.height);
+    context.drawImage(this._juice, 960 + vector.x - this._juice.width / 2, 640 - vector.y - this._juice.width / 2, this._juice.width, this._juice.height);
   },
 
-  _isInserted: function(event) {
-    console.log(event.clientX, event.clientY) 
-    var mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    var mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+  _hasIntersection: function(event) {
+    var mouseX = (event.offsetX/ this.width) * 2 - 1;
+    var mouseY = -(event.offsetY/ this.height) * 2 + 1;
 
-    var projector = new THREE.Projector();
-    var vector = new THREE.Vector3( mouseX, mouseY, 1 );
-    projector.unprojectVector( vector, this.camera );
-    console.log(vector.x, vector.y, vector.z)
+    var vector = new THREE.Vector3( mouseX, mouseY, 0.5 );
+    this.projector.unprojectVector( vector, this.camera );
 
-    var ray = new THREE.Ray( this.camera.position, vector.subSelf( this.camera.position ).normalize() );
+    var ray = new THREE.Ray( vector, new THREE.Vector3(0, 0, 1));
 
     var intersects = ray.intersectObjects(this._fruits);
     if (intersects.length  > 0) {
-      console.log(this._fruits);
       return true;
     }
     return false;
   },
 };
 
-
-
-//container.appendChild( renderer.domElement );
-
-//projector = new THREE.Projector();
-
-
-
-
-
-//function onDocumentMouseDown( event ) {
-//event.preventDefault();
-
-//var mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-//var mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-
-//var vector = new THREE.Vector3( mouseX, mouseY, 1 );
-//projector.unprojectVector( vector, camera );
-//console.log(vector.x, vector.y, vector.z)
-
-//var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
-
-//var intersects = ray.intersectObjects(fruitObjs);
-
-//if ( intersects.length > 0 ) {
-//console.log(intersects);
-//}
