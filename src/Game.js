@@ -26,13 +26,13 @@ function Game(opts) {
   // create renderer
   this.renderer = new THREE.WebGLRenderer({ antialias: true });
   this.renderer.setSize(this.width, this.height);
-  container.appendChild(this.renderer.domElement);
+  this.container.appendChild(this.renderer.domElement);
 
   // create stats
   this.stats = new Stats();
   this.stats.domElement.style.position = 'absolute';
   this.stats.domElement.style.top = '0px';
-  container.appendChild(this.stats.domElement);
+  this.container.appendChild(this.stats.domElement);
 
   // register events
   document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
