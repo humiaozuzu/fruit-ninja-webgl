@@ -28,3 +28,9 @@ map_Kd apple_stem.jpg
 
 newmtl default_Mat
 illum 1
+
+newmtl Mat
+Kd 0.800000 0.800000 0.800000
+illum 2
+Ns 50.781250
+map_Kd apple_half.jpg
