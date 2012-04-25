@@ -37,7 +37,6 @@ function Game(opts) {
   // register events
   document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
   var gameScene = this.container.childNodes[0];
-  console.log(gameScene);
   gameScene.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
 
   //this.controls = new THREE.TrackballControls(this.camera);
