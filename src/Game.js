@@ -2,6 +2,7 @@ function Game(opts) {
   this.width     = opts.width;
   this.height    = opts.height;
   this.container = opts.container;
+  this.loader    = opts.loader;
 
   // create projector for cordinate transform
   this.projector = new THREE.Projector();
@@ -11,8 +12,8 @@ function Game(opts) {
 
   // create camera
   //this.camera = new THREE.OrthographicCamera(40, this.width / this.height, 1, 1000000);
-  this.camera = new THREE.OrthographicCamera(-960, 960, 640, -640, 1, 1000000);
-  this.camera.position.set(0, 0, 2637);
+  this.camera = new THREE.OrthographicCamera(-640, 640, 480, -480, 1, 1000000);
+  this.camera.position.set(0, 0, 2500);
   this.scene.add(this.camera);
 
   // create lights
@@ -26,26 +27,80 @@ function Game(opts) {
   // create renderer
   this.renderer = new THREE.WebGLRenderer({ antialias: true });
   this.renderer.setSize(this.width, this.height);
-  this.container.appendChild(this.renderer.domElement);
+  $(this.container).append(this.renderer.domElement);
+  $(this.renderer.domElement).css({
+    'position'    : 'absolute',
+    'left' : (window.innerWidth - this.width) / 2,
+    'top'  : (window.innerHeight - this.height) / 2,
+    'z-index': '11',
+  });
+
 
   // create stats
   this.stats = new Stats();
   this.stats.domElement.style.position = 'absolute';
   this.stats.domElement.style.top = '0px';
-  this.container.appendChild(this.stats.domElement);
+  $(this.container).append(this.stats.domElement);
 
   // register events
-  document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
-  var gameScene = this.container.childNodes[0];
-  gameScene.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
+  //document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
+  //var gameScene = this.container.childNodes[0];
+  //gameScene.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
+  $('#container').mousedown(this.onDocumentMouseDown.bind(this));
 
-  //this.controls = new THREE.TrackballControls(this.camera);
+  this.controls = new THREE.TrackballControls(this.camera);
 }
 
 Game.prototype = {
   initScene:function() {
-    this._initBackground();
-    this._initFruits();
+    this._currentScene = 'home';
+    this._initUI();
+    this._initCanvas();
+    this._openHomeUI();
+    //this._initBackground();
+    //this._initFruits();
+  },
+
+  _initUI: function() {
+    // init menu entry for uiHome
+    this.uiHome = new THREE.Object3D();
+    var startEntry = this.loader.cloneObject();
+    startEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+    startEntry.position.x = -300;
+    startEntry.rotation.x = 0.2;
+    startEntry.rotation.z = 0.2;
+    this.uiHome.add(startEntry);
+
+    var helpEntry = this.loader.cloneObject();
+    helpEntry.rotation.x = 0.2;
+    helpEntry.rotation.z = 0.2;
+    helpEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+    this.uiHome.add(helpEntry);
+
+    // TODO: uiAbout, uiGame, uiConfig
+  },
+  
+  _initCanvas: function() {
+    var self = this;
+    var canvas = this._Canvas = document.createElement('canvas');
+    canvas.width = this.width;
+    canvas.height = this.height;
+    var context = canvas.getContext('2d');
+    $(this.container).append(canvas);
+    $(canvas).css({
+      'position'   : 'absolute',
+      'left'       : (window.innerWidth - this.width) / 2,
+      'top'        : (window.innerHeight - this.height) / 2,
+      'box-shadow' : '0px 0px 15px rgba(0, 0, 0, 0.85)',
+    });
+
+    image = this.loader.images[0];
+    context.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+  },
+
+  _openHomeUI: function() {
+    this.scene.add(this.uiHome);
+    console.log(this.uiHome.children)
   },
 
   _initBackground: function() {
@@ -118,6 +173,20 @@ Game.prototype = {
       loader.load(model, createFruit);
     });
 
+    var apple = new THREE.Object3D();
+    var apple1, apple2;
+    loader.load('models/apple/apple_half1.js', function(geometry) {
+      apple1 = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial());
+      apple.add(apple1);
+    });
+    loader.load('models/apple/apple_half2.js', function(geometry) {
+      apple2 = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial());
+      apple.add(apple2);
+      apple.position.z = 100;
+      apple.scale.set(2, 2, 2);
+      self.scene.add(apple);
+      console.log(apple.children)
+    });
   },
 
   renderLoop: function() {
@@ -130,8 +199,9 @@ Game.prototype = {
   },
 
   _update: function() {
-    this._updateBackgroungMesh();
-    this._updateFruits();
+    //this._updateBackgroungMesh();
+    //this._updateFruits();
+    this._updateUI();
     this._updateCamera();
     this.stats.update();
   },
@@ -155,6 +225,14 @@ Game.prototype = {
     this._needBackgroundUpdate = false;
   },
 
+  _updateUI: function() {
+    if (this._currentScene == 'home') {
+      this.uiHome.children.forEach(function(fruit) {
+        fruit.rotation.addSelf(fruit.rotationDelta);
+      });
+    }
+  },
+
   _updateFruits: function() {
     this._fruits.forEach(function(fruit) {
       fruit.position.addSelf(fruit.speed);
@@ -164,7 +242,7 @@ Game.prototype = {
   },
 
   _updateCamera: function() {
-    //this.controls.update();
+    this.controls.update();
     this.camera.lookAt(this.scene.position);
   },
 
@@ -174,11 +252,18 @@ Game.prototype = {
   },
 
   onDocumentMouseDown: function(event) {
-    this._needBackgroundUpdate = true;
     event.preventDefault();
-    if (this._hasIntersection(event)) {
-      this._drawSplashedJuice(event.offsetX, event.offsetY);
+
+    if (this._currentScene == 'home') {
+      console.log(event.offsetX, event.offsetY)
+      if (this._hasIntersection(event)) {
+        alert(123)
+      }
     }
+    //this._needBackgroundUpdate = true;
+    //if (this._hasIntersection(event)) {
+      //this._drawSplashedJuice(event.offsetX, event.offsetY);
+    //}
   },
 
   onDocumentMouseMove: function() {
@@ -210,7 +295,9 @@ Game.prototype = {
 
     var ray = new THREE.Ray( vector, new THREE.Vector3(0, 0, 1));
 
-    var intersects = ray.intersectObjects(this._fruits);
+    var intersects = ray.intersectObjects(this.uiHome.allChildren);
+    console.log(this.uiHome.allChildren)
+    console.log(intersects)
     if (intersects.length  > 0) {
       return true;
     }
