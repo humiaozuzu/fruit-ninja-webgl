@@ -1,22 +1,19 @@
 #!/bin/bash
 
-python convert_obj_three.py -i apple/apple.obj -o apple/apple.js
+python convert_obj_three.py -i ../models/apple/apple_half1.obj -o ../models/apple/apple_half1.js
+python convert_obj_three.py -i ../models/apple/apple_half2.obj -o ../models/apple/apple_half2.js
 
-python convert_obj_three.py -i banana/banana.obj -o banana/banana.js
-python convert_obj_three.py -i banana/banana_half_top.obj -o banana/banana_half_top.js
-python convert_obj_three.py -i banana/banana_half_bottom.obj -o banana/banana_half_bottom.js
+python convert_obj_three.py -i ../models/banana/banana_half1.obj -o ../models/banana/banana_half1.js
+python convert_obj_three.py -i ../models/banana/banana_half2.obj -o ../models/banana/banana_half2.js
 
-python convert_obj_three.py -i kiwi/kiwi.obj -o kiwi/kiwi.js
-python convert_obj_three.py -i kiwi/kiwi_half.obj -o kiwi/kiwi_half.js
+python convert_obj_three.py -i ../models/kiwi/kiwi_half1.obj -o ../models/kiwi/kiwi_half1.js
+python convert_obj_three.py -i ../models/kiwi/kiwi_half2.obj -o ../models/kiwi/kiwi_half2.js
 
-python convert_obj_three.py -i orange/orange.obj -o orange/orange.js
-python convert_obj_three.py -i orange/orange_half.obj -o orange/orange_half.js
+python convert_obj_three.py -i ../models/orange/orange_half1.obj -o ../models/orange/orange_half1.js
+python convert_obj_three.py -i ../models/orange/orange_half2.obj -o ../models/orange/orange_half2.js
 
-python convert_obj_three.py -i pear/pear.obj -o pear/pear.js
-python convert_obj_three.py -i pear/pear_half.obj -o pear/pear_half.js
+python convert_obj_three.py -i ../models/pear/pear_half1.obj -o ../models/pear/pear_half1.js
+python convert_obj_three.py -i ../models/pear/pear_half2.obj -o ../models/pear/pear_half2.js
 
-python convert_obj_three.py -i strawberry/strawbarry.obj -o strawberry/strawbarry.js
-python convert_obj_three.py -i strawberry/strawbarry_half.obj -o strawberry/strawbarry_half.js
-
-python convert_obj_three.py -i watermelon/watermelon.obj -o watermelon/watermelon.js
-python convert_obj_three.py -i watermelon/watermelon_half.obj -o watermelon/watermelon_half.js
+python convert_obj_three.py -i ../models/watermelon/watermelon_half1.obj -o ../models/watermelon/watermelon_half1.js
+python convert_obj_three.py -i ../models/watermelon/watermelon_half2.obj -o ../models/watermelon/watermelon_half2.js
