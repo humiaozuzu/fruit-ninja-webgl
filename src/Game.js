@@ -64,14 +64,14 @@ Game.prototype = {
   _initUI: function() {
     // init menu entry for uiHome
     this.uiHome = new THREE.Object3D();
-    var startEntry = this.loader.cloneObject();
+    var startEntry = this.loader.cloneObject('banana');
     startEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
     startEntry.position.x = -300;
     startEntry.rotation.x = 0.2;
     startEntry.rotation.z = 0.2;
     this.uiHome.add(startEntry);
 
-    var helpEntry = this.loader.cloneObject();
+    var helpEntry = this.loader.cloneObject('watermelon');
     helpEntry.rotation.x = 0.2;
     helpEntry.rotation.z = 0.2;
     helpEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
@@ -82,25 +82,39 @@ Game.prototype = {
   
   _initCanvas: function() {
     var self = this;
-    var canvas = this._Canvas = document.createElement('canvas');
-    canvas.width = this.width;
-    canvas.height = this.height;
-    var context = canvas.getContext('2d');
-    $(this.container).append(canvas);
+
+    // create main canvas
+    var canvas = this._mainCanvas = document.createElement('canvas');
+    this._mainContext = this._mainCanvas.getContext('2d');
+    this._mainCanvas.width = this.width;
+    this._mainCanvas.height = this.height;
     $(canvas).css({
       'position'   : 'absolute',
       'left'       : (window.innerWidth - this.width) / 2,
       'top'        : (window.innerHeight - this.height) / 2,
-      'box-shadow' : '0px 0px 15px rgba(0, 0, 0, 0.85)',
+      'box-shadow' : '0px 0px 25px rgba(0, 0, 0, 0.85)',
     });
+    $(this.container).append(canvas);
+
+    // create canvas layers
+    this._canvases = new Array(2);
+    this._contexts = new Array(2);
+
+    for (var i = 0; i < this._canvases.length; ++i) {
+      this._canvases[i] = document.createElement("canvas");
+      this._contexts[i] = this._canvases[i].getContext("2d");
+    }
 
     image = this.loader.images[0];
-    context.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+    this._canvases[0].width = canvas.width;
+    this._canvases[0].height = canvas.height;
+
+    this._contexts[0].drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+    this._canvasNeedUpdate = true;
   },
 
   _openHomeUI: function() {
     this.scene.add(this.uiHome);
-    console.log(this.uiHome.children)
   },
 
   _initBackground: function() {
@@ -202,6 +216,7 @@ Game.prototype = {
     //this._updateBackgroungMesh();
     //this._updateFruits();
     this._updateUI();
+    this._updateCanvas();
     this._updateCamera();
     this.stats.update();
   },
@@ -223,6 +238,15 @@ Game.prototype = {
     this._backgroundMesh.material.map = texture;  
     this._backgroundMesh.material.needsUpdate = true;
     this._needBackgroundUpdate = false;
+  },
+
+  _updateCanvas: function() {
+    if (this._canvasNeedUpdate) {
+      for (var i = 0; i < this._canvases.length; ++i) {
+        this._mainContext.drawImage(this._canvases[i], 0, 0);
+      }
+      this._canvasNeedUpdate = false;
+    }
   },
 
   _updateUI: function() {

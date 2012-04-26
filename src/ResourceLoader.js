@@ -1,20 +1,26 @@
 function ResourceLoader() {
-  this.objects = [];
+  this.objects = {};
   this.images = [];
 
-  this.total = 4;
+  this.total = 0;
   this.loaded = 0;
 
   this.load = function(callbackFunc) {
     var self = this;
     this.loadedCallBack = callbackFunc;
 
-    var fruitNames = ['apple', 'banana'];
+    var fruitNames = ['apple', 'banana', 'kiwi', 'orange', 'pear', 'watermelon'];
     fruitNames.forEach(function(name) {
       self._loadObject(name);
     });
 
-    var imageNames = ['bg_fruit_ninja_1280_960.jpg', 'ring_start.png'];
+    var imageNames = [
+      'bg_fruit_ninja_1280_960.jpg',
+      'bg_fruit_ninja_1280_960.jpg',
+      'bg_i_heart_sensei_1280_960.jpg',
+      'bg_greatwave_1280_960.jpg',
+      'bg_store_1280_960.jpg',
+    ];
     imageNames.forEach(function(name) {
       self._loadImage(name);
     });
@@ -22,7 +28,7 @@ function ResourceLoader() {
 
   this._loadObject = function(objectName) {
     var self = this;
-    //this.total += 1;
+    this.total += 1;
     var loader = new THREE.JSONLoader();
     var object = new THREE.Object3D();
     var object1, object2;
@@ -36,8 +42,7 @@ function ResourceLoader() {
         object.position.z = 100;
         object.scale.set(2, 2, 2);
 
-        self.objects.push(object);
-        console.log(object);
+        self.objects[objectName] = object;
         self.loaded += 1;
         self.loadedCallBack(self.total, self.loaded);
       });
@@ -45,8 +50,9 @@ function ResourceLoader() {
   };
 
   this.cloneObject = function(name) {
-    mesh1 = this.objects[0].children[0]; 
-    mesh2 = this.objects[0].children[1]; 
+    var mesh1 = this.objects[name].children[0]; 
+    var mesh2 = this.objects[name].children[1]; 
+    console.log(this.objects[name]);
 
     var object = new THREE.Object3D();
     object1 = new THREE.Mesh(mesh1.geometry, new THREE.MeshFaceMaterial());
@@ -60,7 +66,7 @@ function ResourceLoader() {
 
   this._loadImage = function(imageName) {
     var self = this;
-    //this.total += 1;
+    this.total += 1;
 
     var image = new Image();
     image.onload = function() {
