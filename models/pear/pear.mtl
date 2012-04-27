@@ -24,7 +24,7 @@ illum 2
 Ns 50.781250
 d 1.000000
 Ni 1.500000
-map_Kd pear.jpg
+map_Kd pear_skin.jpg
 
 newmtl Material__2
 Kd 0.345098 0.384314 0.423529
