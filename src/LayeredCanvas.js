@@ -30,7 +30,6 @@ function LayeredCanvas(n, width, height) {
     this.contexts[n].rotate(angle);
     this.contexts[n].drawImage(image, -(image.width / 2), -(image.height / 2));
     this.contexts[n].restore();
-    console.log(angle)
   }
 
   this.update = function() {
