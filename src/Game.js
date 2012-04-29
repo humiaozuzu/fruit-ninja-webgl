@@ -124,9 +124,9 @@ Game.prototype = {
     if (this.bgCanvas.fps % 2 == 0) {
       this.bgCanvas.needUpdate = true;
       this.bgCanvas.angle += 0.05;
-      this.bgCanvas.drawRotateLayer(1, this.loader.images[1], this.bgCanvas.angle, 0, 0, true);
-      this.bgCanvas.drawRotateLayer(1, this.loader.images[2], this.bgCanvas.angle, -300, 0, false);
-      this.bgCanvas.drawRotateLayer(1, this.loader.images[3], this.bgCanvas.angle, 300, 0, false);
+      //this.bgCanvas.drawRotateLayer(1, this.loader.images[1], this.bgCanvas.angle, 0, 0, true);
+      //this.bgCanvas.drawRotateLayer(1, this.loader.images[2], this.bgCanvas.angle, -300, 0, false);
+      //this.bgCanvas.drawRotateLayer(1, this.loader.images[3], this.bgCanvas.angle, 300, 0, false);
     }
      
     if (this.bgCanvas.needUpdate) {
@@ -155,7 +155,7 @@ Game.prototype = {
   },
 
   _updateCamera: function() {
-    this.controls.update();
+    //this.controls.update();
     this.camera.lookAt(this.scene.position);
   },
 
@@ -165,8 +165,15 @@ Game.prototype = {
   },
 
   onDocumentMouseDown: function(event) {
+    if (!event.offsetX) {
+      event.offsetX = event.clientX - $(event.target).position().left;
+      event.offsetY = event.clientY - $(event.target).position().top;
+    }
+    console.log(event)
+
     var self = this;
     event.preventDefault();
+    console.log(event.offsetX)
 
     if (this._currentScene == 'home') {
       var intersects;
