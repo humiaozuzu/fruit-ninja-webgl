@@ -91,6 +91,10 @@ Game.prototype = {
     this.scene.add(this.um.uiHome);
   },
 
+  _openGameUI: function() {
+    this.scene.add(this.um.uiGame);
+  },
+
   _openTestUI: function() {
     //this.scene.add(this.uiTest);
   },
@@ -136,12 +140,18 @@ Game.prototype = {
       this.um.uiHome.children.forEach(function(fruit) {
         fruit.update();
       });
-    }
-    else if (this._currentScene == 'about') {
+    } else if (this._currentScene == 'about') {
       this.um.uiAbout.children.forEach(function(fruit) {
         fruit.update();
       });
-    }
+    } else if (this._currentScene == 'game') {
+      console.log(this.um.uiGame);
+      this.um.uiGame.children.forEach(function(fruit) {
+        fruit.update();
+      });
+      console.log(123)
+    };
+
   },
 
   _updateCamera: function() {
@@ -172,6 +182,13 @@ Game.prototype = {
             self._openAboutUI();
             self._currentScene = 'about';
           }, 1000);
+        } else if (parentObject.name == 'game') {
+          setTimeout(function() {
+            self.scene.remove(self.um.uiHome);
+            self._openGameUI();
+            self._currentScene = 'game';
+            self._generateFruit();
+          }, 1000);
         }
       }
     } else if (this._currentScene == 'about') {
@@ -192,7 +209,29 @@ Game.prototype = {
           }, 1000);
         }
       }
-    }
+    } else if (this._currentScene == 'game') {
+      var intersects;
+      if (intersects = this._hasIntersection(event)) {
+        console.log('hitted!')
+        var parentObject = intersects[0].object.parent;
+        console.log(parentObject.name)
+        parentObject.drop(true);
+      }
+    };
+  },
+
+  _generateFruit: function() {
+    var self = this;
+    console.log(this.um.uiGame)
+    if (this._currentScene == 'game') {
+      var fruit = self.loader.cloneObject('apple');
+      fruit.reset();
+      fruit.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+      fruit.position.set(0, -500, 100);
+      fruit.speed = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 2+20, 0);
+      this.um.uiGame.add(fruit);
+      setTimeout(function() {self._generateFruit();}, 1500);
+    } 
   },
 
   onDocumentMouseMove: function() {
@@ -209,6 +248,11 @@ Game.prototype = {
     }
     if (this._currentScene == 'about') {
       this.um.uiAbout.children.forEach(function(fruit) {
+        intersectList = intersectList.concat(fruit.children); 
+      });
+    }
+    if (this._currentScene == 'game') {
+      this.um.uiGame.children.forEach(function(fruit) {
         intersectList = intersectList.concat(fruit.children); 
       });
     }

@@ -4,14 +4,14 @@ function UIManager() {
     // init menu entry for uiHome
     this.uiHome = new THREE.Object3D();
     this.uiHome.name = 'home';
-    var startEntry = loader.cloneObject('apple');
-    this.uiHome.add(startEntry);
+    var gameEntry = loader.cloneObject('kiwi');
+    this.uiHome.add(gameEntry);
     var aboutEntry = loader.cloneObject('watermelon');
     this.uiHome.add(aboutEntry);
     var settingsEntry = loader.cloneObject('banana');
     this.uiHome.add(settingsEntry);
     // some shortcut
-    this.uiHome.startEntry = startEntry;
+    this.uiHome.gameEntry = gameEntry;
     this.uiHome.aboutEntry = aboutEntry;
     this.uiHome.settingsEntry = settingsEntry;
     this.reset(this.uiHome);
@@ -28,16 +28,19 @@ function UIManager() {
     this.uiAbout.returnEntry = returnEntry;
     this.reset(this.uiAbout);
   
+    // init uiGame
+    this.uiGame = new THREE.Object3D();
+    this.uiGame.name = 'game';
   };
 
   this.reset = function(uiObject) {
     var name = uiObject.name;
 
     if (name == 'home') {
-      uiObject.startEntry.reset();
-      uiObject.startEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
-      uiObject.startEntry.position.x = -300;
-      uiObject.startEntry.name = 'start';
+      uiObject.gameEntry.reset();
+      uiObject.gameEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+      uiObject.gameEntry.position.x = -300;
+      uiObject.gameEntry.name = 'game';
 
       uiObject.aboutEntry.reset();
       uiObject.aboutEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
@@ -55,5 +58,4 @@ function UIManager() {
       uiObject.returnEntry.name = 'return';
     }
   };
-
 };
