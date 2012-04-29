@@ -30,6 +30,7 @@ function ResourceLoader() {
     });
   };
 
+  // functions extengs fruit object
   function updateObject() {
     if (!this.sliced) {
       this.rotation.addSelf(this.rotationDelta);
@@ -42,6 +43,7 @@ function ResourceLoader() {
       this.children.forEach(function(fruit) {
         fruit.rotation.addSelf(fruit.rotationDelta);
         fruit.position.addSelf(fruit.speed);
+        fruit.speed.y -= 9.8 / 30;
       });        
     }
   }
@@ -53,6 +55,18 @@ function ResourceLoader() {
     this.children.forEach(function(fruit) {
       fruit.position.set(0, 0, 0);
     });
+  }
+
+  function dropObject(sliced) {
+    if (sliced) {
+      this.sliced = true;
+      this.children.forEach(function(fruit) {
+        fruit.rotationDelta = fruit.parent.rotationDelta;
+        fruit.speed = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 5, 0);
+      });
+    } else {
+      this.speed = new THREE.Vector3(Math.random() * 5 - 10, Math.random() * 5, 0);
+    }
   }
 
   this._loadObject = function(objectName) {
@@ -82,17 +96,16 @@ function ResourceLoader() {
   this.cloneObject = function(name) {
     var mesh1 = this.objects[name].children[0]; 
     var mesh2 = this.objects[name].children[1]; 
-    console.log(this.objects[name]);
 
     var object = new THREE.Object3D();
     object1 = new THREE.Mesh(mesh1.geometry, new THREE.MeshFaceMaterial());
     object2 = new THREE.Mesh(mesh2.geometry, new THREE.MeshFaceMaterial());
     object.add(object1);
     object.add(object2);
-    //object1.update = updateObject;
-    //object2.update = updateObject;
+    // extend 
     object.update = updateObject;
     object.reset = resetObject;
+    object.drop = dropObject;
     object.position.z = 100;
     object.scale.set(2, 2, 2);
     return object;

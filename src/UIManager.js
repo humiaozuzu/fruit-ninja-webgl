@@ -16,10 +16,13 @@ function UIManager() {
     this.uiHome.settingsEntry = settingsEntry;
     this.reset(this.uiHome);
 
+    console.log(settingsEntry);
+
     // init uiAbout
     this.uiAbout = new THREE.Object3D();
     this.uiAbout.name = 'about';
     var returnEntry = loader.cloneObject('banana');
+    console.log(returnEntry)
     this.uiAbout.add(returnEntry);
     // set shortcut
     this.uiAbout.returnEntry = returnEntry;
