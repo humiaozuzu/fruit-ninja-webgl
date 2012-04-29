@@ -120,7 +120,7 @@ Game.prototype = {
       'position'   : 'absolute',
       'left'       : (window.innerWidth - this.width) / 2,
       'top'        : (window.innerHeight - this.height) / 2,
-      'box-shadow' : '0px 0px 25px rgba(0, 0, 0, 0.85)',
+      'box-shadow' : '0px 2px 35px rgba(0, 0, 0, 0.85)',
     });
     $(this.container).append(this.bgCanvas.mainCanvas);
 
@@ -167,7 +167,9 @@ Game.prototype = {
     if (this.bgCanvas.fps % 2 == 0) {
       this.bgCanvas.needUpdate = true;
       this.bgCanvas.angle += 0.05;
-      this.bgCanvas.drawRotateLayer(1, this.loader.images[1], this.bgCanvas.angle, 85, 195);
+      this.bgCanvas.drawRotateLayer(1, this.loader.images[1], this.bgCanvas.angle, 0, 0, true);
+      this.bgCanvas.drawRotateLayer(1, this.loader.images[2], this.bgCanvas.angle, -300, 0, false);
+      this.bgCanvas.drawRotateLayer(1, this.loader.images[3], this.bgCanvas.angle, 300, 0, false);
     }
      
     if (this.bgCanvas.needUpdate) {

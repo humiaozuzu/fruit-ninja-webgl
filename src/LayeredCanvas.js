@@ -23,18 +23,28 @@ function LayeredCanvas(n, width, height) {
     }
   };
 
-  this.drawRotateLayer = function(n, image, angle, dx, dy, dw, dh) {
-    this.contexts[n].clearRect(0, 0, 512, 512);
+  this.drawRotateLayer = function(n, image, angle, dx, dy, needClear) {
+    if (needClear) {
+      this.contexts[n].clearRect(0, 0, 1280, 960);
+    }
     this.contexts[n].save();
-    this.contexts[n].translate(dx + image.width / 2, dy + image.height / 2);
+    this.contexts[n].translate(this._canvasX(dx) , this._canvasY(dy));
     this.contexts[n].rotate(angle);
     this.contexts[n].drawImage(image, -(image.width / 2), -(image.height / 2));
     this.contexts[n].restore();
-  }
+  };
 
   this.update = function() {
     for (var i = 0; i < this.canvases.length; ++i) {
       this.mainContext.drawImage(this.canvases[i], 0, 0, this.mainCanvas.width, this.mainCanvas.height);
     }
-  }
+  };
+
+  this._canvasX = function(x) {
+    return x + 640;
+  };
+
+  this._canvasY = function(y) {
+    return -y + 480;
+  };
 }

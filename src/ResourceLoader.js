@@ -15,9 +15,11 @@ function ResourceLoader() {
     });
 
     var imageNames = [
-      'bg_fruit_ninja_1280_960.jpg',
+      //'bg_fruit_ninja_1280_960.jpg',
+      'bg_greatwave_1280_960.jpg',
       'ring_start.png',
-      'textfx.png',
+      'ring_dojo.png',
+      'ring_settings.png',
       //'bg_fruit_ninja_1280_960.jpg',
       //'bg_i_heart_sensei_1280_960.jpg',
       //'bg_greatwave_1280_960.jpg',
