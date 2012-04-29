@@ -44,6 +44,15 @@ function ResourceLoader() {
     }
   }
 
+  function resetObject() {
+    this.sliced = false;
+    this.position.set(0, 0, 0);
+    this.speed = undefined;
+    this.children.forEach(function(fruit) {
+      fruit.position.set(0, 0, 0);
+    });
+  }
+
   this._loadObject = function(objectName) {
     var self = this;
     this.total += 1;
@@ -78,9 +87,10 @@ function ResourceLoader() {
     object2 = new THREE.Mesh(mesh2.geometry, new THREE.MeshFaceMaterial());
     object.add(object1);
     object.add(object2);
-    object1.update = updateObject;
-    object2.update = updateObject;
+    //object1.update = updateObject;
+    //object2.update = updateObject;
     object.update = updateObject;
+    object.reset = resetObject;
     object.position.z = 100;
     object.scale.set(2, 2, 2);
     return object;

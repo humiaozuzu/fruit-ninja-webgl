@@ -11,8 +11,8 @@ function LayeredCanvas(n, width, height) {
   for (var i = 0; i < this.canvases.length; ++i) {
     this.canvases[i] = document.createElement("canvas");
     this.contexts[i] = this.canvases[i].getContext("2d");
-    this.canvases[i].width = this.mainCanvas.width;
-    this.canvases[i].height = this.mainCanvas.height;
+    this.canvases[i].width = 1280;
+    this.canvases[i].height = 960;
   }
 
   this.drawLayer = function(n, image, dx, dy, dw, dh) {
@@ -24,7 +24,7 @@ function LayeredCanvas(n, width, height) {
   };
 
   this.drawRotateLayer = function(n, image, angle, dx, dy, dw, dh) {
-    this.contexts[n].clearRect(0, 0, 256, 256);
+    this.contexts[n].clearRect(0, 0, 512, 512);
     this.contexts[n].save();
     this.contexts[n].translate(dx + image.width / 2, dy + image.height / 2);
     this.contexts[n].rotate(angle);
@@ -34,7 +34,7 @@ function LayeredCanvas(n, width, height) {
 
   this.update = function() {
     for (var i = 0; i < this.canvases.length; ++i) {
-      this.mainContext.drawImage(this.canvases[i], 0, 0);
+      this.mainContext.drawImage(this.canvases[i], 0, 0, this.mainCanvas.width, this.mainCanvas.height);
     }
   }
 }

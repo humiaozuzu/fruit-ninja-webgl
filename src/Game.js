@@ -54,19 +54,26 @@ function Game(opts) {
 Game.prototype = {
   initScene:function() {
     this._currentScene = 'home';
-    this._initUI();
+    //this._initUI();
+    //
+    this.um = new UIManager();
+    console.log('initing UIs');
+    this.um.init(this.loader);
     this._initCanvas();
     this._openHomeUI();
+    this._openTestUI();
   },
 
   _initUI: function() {
+    var self = this;
     // init menu entry for uiHome
     this.uiHome = new THREE.Object3D();
-    var startEntry = this.loader.cloneObject('apple');
+    var startEntry = this.loader.cloneObject('kiwi');
     startEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
     startEntry.position.x = -300;
     startEntry.rotation.x = 0.2;
     startEntry.rotation.z = 0.2;
+    startEntry.name = 'start';
     //startEntry.speed = new THREE.Vector3(10, 5, 0);
     this.uiHome.add(startEntry);
     this.uiHome.allChildren = startEntry.children.slice();
@@ -76,16 +83,30 @@ Game.prototype = {
     helpEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
     helpEntry.rotation.x = 0.2;
     helpEntry.rotation.z = 0.2;
+    helpEntry.name = 'about';
     this.uiHome.add(helpEntry);
     this.uiHome.allChildren = this.uiHome.allChildren.concat(helpEntry.children);
 
     // init uiAbout
     this.uiAbout = new THREE.Object3D();
-    var returnEntry = this.loader.cloneObject('kiwi');
+    var returnEntry = this.loader.cloneObject('banana');
     returnEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
     returnEntry.position.x = -300;
+    returnEntry.name = 'return';
     this.uiAbout.add(returnEntry);
     this.uiAbout.allChildren = this.uiAbout.children.slice();
+
+    var objectName = 'kiwi';
+    var loader = new THREE.JSONLoader();
+    loader.load('models/'+objectName+'/'+objectName+'_half1.js', function(geometry) {
+      object = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial());
+      object.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+      object.position.z = 100;
+      object.position.x = 300;
+      object.scale.set(2, 2, 2);
+      object.sliced = false;
+      self.scene.add(object);
+    });
 
     // TODO: uiGame, uiConfig
   },
@@ -106,7 +127,7 @@ Game.prototype = {
     image = this.loader.images[0];
     start_ring_image = this.loader.images[1];
 
-    this.bgCanvas.drawLayer(0, image, 0, 0, this.width, this.height);
+    this.bgCanvas.drawLayer(0, image);
     this.bgCanvas.drawLayer(1, start_ring_image);
     this.bgCanvas.angle = 0;
     this.bgCanvas.fps = 0;
@@ -114,51 +135,15 @@ Game.prototype = {
   },
 
   _openHomeUI: function() {
-    this.scene.add(this.uiHome);
+    this.scene.add(this.um.uiHome);
+  },
+
+  _openTestUI: function() {
+    //this.scene.add(this.uiTest);
   },
 
   _openAboutUI: function() {
-    this.scene.add(this.uiAbout);
-  },
-
-
-  _initFruits: function() {
-    var self = this;
-
-    this._fruits = [];
-   
-    var createFruit = function(geometry) {
-      var mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial());
-      var x = (Math.random() - 0.5) * 1920;
-      var y = -500;
-      var nx = -x;
-      var vy = 17;
-      var vx = (nx - x) / 3 / 60;
-      mesh.speed = new THREE.Vector3(vx, 17, 0);
-      mesh.scale.set(2, 2, 2);
-      mesh.position.set(x, y, 100);
-      mesh.rotationDelta = new THREE.Vector3(
-        (Math.random() - 0.5) / 10, 
-        (Math.random() - 0.5) / 10, 
-        (Math.random() - 0.5) / 10
-      );
-      self.scene.add(mesh);
-      self._fruits.push(mesh);
-    };
-
-    var loader = new THREE.JSONLoader();
-    var models = [
-      "models/apple/apple.js",
-      "models/banana/banana.js",
-      "models/kiwi/kiwi.js",
-      //"models/orange/orange.js",
-      //"models/pear/pear.js",
-      //"models/strawberry/strawbarry.js",
-      //"models/watermelon/watermelon.js",
-    ];
-    models.forEach(function(model) {
-      loader.load(model, createFruit);
-    });
+    this.scene.add(this.um.uiAbout);
   },
 
   renderLoop: function() {
@@ -182,7 +167,7 @@ Game.prototype = {
     if (this.bgCanvas.fps % 2 == 0) {
       this.bgCanvas.needUpdate = true;
       this.bgCanvas.angle += 0.05;
-      this.bgCanvas.drawRotateLayer(1, this.loader.images[1], this.bgCanvas.angle, 0, 0);
+      this.bgCanvas.drawRotateLayer(1, this.loader.images[1], this.bgCanvas.angle, 85, 195);
     }
      
     if (this.bgCanvas.needUpdate) {
@@ -193,18 +178,10 @@ Game.prototype = {
 
   _updateUI: function() {
     if (this._currentScene == 'home') {
-      this.uiHome.children.forEach(function(fruit) {
+      this.um.uiHome.children.forEach(function(fruit) {
         fruit.update();
       });
     }
-  },
-
-  _updateFruits: function() {
-    this._fruits.forEach(function(fruit) {
-      fruit.position.addSelf(fruit.speed);
-      fruit.speed.y -= 9.8 / 60;
-      fruit.rotation.addSelf(fruit.rotationDelta);
-    });
   },
 
   _updateCamera: function() {
@@ -232,18 +209,56 @@ Game.prototype = {
           fruit.speed = new THREE.Vector3(Math.random() * 10 - 6, Math.random() * 5 -10, 0);
         });
         //this.uiHome.children[0].sliced = true;
-        //this.scene.remove(this.uiHome);
-        //this._openAboutUI();
+        console.log(parentObject.name)
+        if (parentObject.name == 'about') {
+          console.log(123)
+          this.scene.remove(this.um.uiHome);
+          this._openAboutUI();
+          this._currentScene = 'about';
+        }
+        console.log(parentObject.name)
+      }
+    } else if (this._currentScene == 'about') {
+      var intersects;
+      if (intersects = this._hasIntersection(event)) {
+        console.log('hitted!')
+        var parentObject = intersects[0].object.parent;
+        console.log(parentObject.name)
+        parentObject.sliced = true;
+        parentObject.children.forEach(function(fruit) {
+          fruit.rotationDelta = fruit.parent.rotationDelta;
+          fruit.speed = new THREE.Vector3(Math.random() * 10 - 6, Math.random() * 5 -10, 0);
+        });
+        //this.uiHome.children[0].sliced = true;
+        if (parentObject.name == 'return') {
+          this.scene.remove(this.um.uiAbout);
+          this.um.reset(this.um.uiHome);
+          console.log(this.um.uiHome.aboutEntry)
+          this._openHomeUI();
+          this._currentScene = 'home';
+        }
       }
     }
-    //this._needBackgroundUpdate = true;
-    //if (this._hasIntersection(event)) {
-      //this._drawSplashedJuice(event.offsetX, event.offsetY);
-    //}
   },
 
   onDocumentMouseMove: function() {
   
+  },
+
+  _buildIntersectList: function() {
+    var intersectList = []; 
+
+    if (this._currentScene == 'home') {
+      this.um.uiHome.children.forEach(function(fruit) {
+        intersectList = intersectList.concat(fruit.children); 
+      });
+    }
+    if (this._currentScene == 'about') {
+      this.um.uiAbout.children.forEach(function(fruit) {
+        intersectList = intersectList.concat(fruit.children); 
+      });
+    }
+    return intersectList;
   },
 
   _hasIntersection: function(event) {
@@ -255,7 +270,7 @@ Game.prototype = {
 
     var ray = new THREE.Ray( vector, new THREE.Vector3(0, 0, 1));
 
-    var intersects = ray.intersectObjects(this.uiHome.allChildren);
+    var intersects = ray.intersectObjects(this._buildIntersectList());
     if (intersects.length  > 0) {
       return intersects;
     }
