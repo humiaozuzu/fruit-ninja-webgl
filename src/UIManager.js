@@ -1,36 +1,45 @@
-function UIManager() {
+function UIManager(scene) {
+  this.scene = scene;
 
   this.init = function(loader) {
-    // init menu entry for uiHome
-    this.uiHome = new THREE.Object3D();
-    this.uiHome.name = 'home';
-    var gameEntry = loader.cloneObject('kiwi');
-    this.uiHome.add(gameEntry);
-    var aboutEntry = loader.cloneObject('watermelon');
-    this.uiHome.add(aboutEntry);
-    var settingsEntry = loader.cloneObject('banana');
-    this.uiHome.add(settingsEntry);
+    // init menu entry for home
+    this.home = new THREE.Object3D();
+    this.home.name = 'home';
+    var gameEntry = new Fruit(loader, 'apple');
+    this.home.add(gameEntry);
+    var aboutEntry = new Fruit(loader, 'watermelon');
+    this.home.add(aboutEntry);
+    var settingsEntry = new Fruit(loader, 'banana');
+    this.home.add(settingsEntry);
     // some shortcut
-    this.uiHome.gameEntry = gameEntry;
-    this.uiHome.aboutEntry = aboutEntry;
-    this.uiHome.settingsEntry = settingsEntry;
-    this.reset(this.uiHome);
+    this.home.gameEntry = gameEntry;
+    this.home.aboutEntry = aboutEntry;
+    this.home.settingsEntry = settingsEntry;
+    this.reset(this.home);
 
     console.log(settingsEntry);
 
-    // init uiAbout
-    this.uiAbout = new THREE.Object3D();
-    this.uiAbout.name = 'about';
-    var returnEntry = loader.cloneObject('banana');
+    // init about
+    this.about = new THREE.Object3D();
+    this.about.name = 'about';
+    var returnEntry = new Fruit(loader, 'banana');
     console.log(returnEntry)
-    this.uiAbout.add(returnEntry);
+    this.about.add(returnEntry);
     // set shortcut
-    this.uiAbout.returnEntry = returnEntry;
-    this.reset(this.uiAbout);
+    this.about.returnEntry = returnEntry;
+    this.reset(this.about);
   
-    // init uiGame
-    this.uiGame = new THREE.Object3D();
-    this.uiGame.name = 'game';
+    // init game
+    this.game = new THREE.Object3D();
+    this.game.name = 'game';
+  };
+
+  this.add = function(name) {
+    this.scene.add(this[name]);
+  }; 
+
+  this.remove = function(name) {
+    this.scene.remove(this[name]);
   };
 
   this.reset = function(uiObject) {

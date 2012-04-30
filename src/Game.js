@@ -62,11 +62,10 @@ Game.prototype = {
         { name: 'exitGame',   from : 'game', to: 'home'  } ,
         //{ name: '' ,        from : '', to: ''          } ,
       ]});
-    //this._initUI();
-    //this.um = new UIManager();
-    //this.um.init(this.loader);
-    //this._initCanvas();
-    //this._openHomeUI();
+    this.um = new UIManager(this.scene);
+    this.um.init(this.loader);
+    this._initCanvas();
+    this.um.add('home');
   },
 
   _initCanvas: function() {
@@ -82,8 +81,9 @@ Game.prototype = {
     });
     $(this.container).append(this.bgCanvas.mainCanvas);
 
-    image = this.loader.images[0];
-    start_ring_image = this.loader.images[1];
+    image = this.loader.images['bg1'];
+    start_ring_image = this.loader.images['ringStart'];
+    console.log(image)
 
     this.bgCanvas.drawLayer(0, image);
     this.bgCanvas.drawLayer(1, start_ring_image);
@@ -114,8 +114,8 @@ Game.prototype = {
   },
 
   _update: function() {
-    //this._updateUI();
-    //this._updateCanvas();
+    this._updateUI();
+    this._updateCanvas();
     this._updateCamera();
     this.stats.update();
   },
@@ -137,22 +137,9 @@ Game.prototype = {
   },
 
   _updateUI: function() {
-    if (this._currentScene == 'home') {
-      this.um.uiHome.children.forEach(function(fruit) {
-        fruit.update();
-      });
-    } else if (this._currentScene == 'about') {
-      this.um.uiAbout.children.forEach(function(fruit) {
-        fruit.update();
-      });
-    } else if (this._currentScene == 'game') {
-      console.log(this.um.uiGame);
-      this.um.uiGame.children.forEach(function(fruit) {
-        fruit.update();
-      });
-      console.log(123)
-    };
-
+    this.um[this.fsm.current].children.forEach(function(fruit) {
+      fruit.update();
+    });
   },
 
   _updateCamera: function() {
@@ -169,12 +156,18 @@ Game.prototype = {
     var self = this;
     event.preventDefault();
     // eggcache Firefox
+    var offX, offY;
     if (!event.offsetX) {
-      event.offsetX = event.clientX - $(event.target).position().left;
-      event.offsetY = event.clientY - $(event.target).position().top;
+      offX = event.clientX - $(event.target).position().left;
+      offY = event.clientY - $(event.target).position().top;
     }
 
     console.log(this.fsm.current);
+      var intersects;
+      if (intersects = this._hasIntersection(event)) {
+        var parentObject = intersects[0].object.parent;
+        console.log('hitted:', parentObject.name);
+      }
 
     if (this._currentScene == 'home') {
       var intersects;
@@ -249,21 +242,9 @@ Game.prototype = {
   _buildIntersectList: function() {
     var intersectList = []; 
 
-    if (this._currentScene == 'home') {
-      this.um.uiHome.children.forEach(function(fruit) {
-        intersectList = intersectList.concat(fruit.children); 
-      });
-    }
-    if (this._currentScene == 'about') {
-      this.um.uiAbout.children.forEach(function(fruit) {
-        intersectList = intersectList.concat(fruit.children); 
-      });
-    }
-    if (this._currentScene == 'game') {
-      this.um.uiGame.children.forEach(function(fruit) {
-        intersectList = intersectList.concat(fruit.children); 
-      });
-    }
+    this.um[this.fsm.current].children.forEach(function(fruit) {
+      intersectList = intersectList.concat(fruit.children); 
+    });
     return intersectList;
   },
 
