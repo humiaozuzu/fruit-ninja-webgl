@@ -58,6 +58,7 @@ Game.prototype = {
       initial: 'home',
       events: [
         { name: 'enterAbout', from : 'home', to: 'about' } ,
+        { name: 'exitAbout',  from : 'about', to: 'home' } ,
         { name: 'startGame',  from : 'home', to: 'game'  } ,
         { name: 'exitGame',   from : 'game', to: 'home'  } ,
         //{ name: '' ,        from : '', to: ''          } ,
@@ -163,80 +164,51 @@ Game.prototype = {
     }
 
     console.log(this.fsm.current);
-      var intersects;
-      if (intersects = this._hasIntersection(event)) {
-        var parentObject = intersects[0].object.parent;
-        console.log('hitted:', parentObject.name);
-      }
+    var intersects;
+    if (intersects = this._hasIntersection(event)) {
+      var parentObject = intersects[0].object.parent;
+      console.log('hitted:', parentObject.name);
+    }
+    parentObject.drop(true);
 
-    if (this._currentScene == 'home') {
-      var intersects;
-      if (intersects = this._hasIntersection(event)) {
-        console.log('hitted!')
-        var parentObject = intersects[0].object.parent;
-        parentObject.drop(true);
+    if (parentObject.name == 'about') {
+      setTimeout(function() {
+        self.um.remove('home');
+        self.um.reset(self.um['about']);
+        self.um.add('about');
+        self.fsm.enterAbout();
+      }, 1000);
+    } else if (parentObject.name == 'game') {
+      setTimeout(function() {
+        self.um.remove('home');
+        self.um.add('game');
+        self.fsm.startGame();
+        self._generateFruit();
+      }, 1000);
+    } else if (parentObject.name == 'return') {
+      setTimeout(function() {
+        self.um.remove('about');
+        self.um.reset(self.um['home']);
+        self.um.add('home');
+        self.fsm.exitAbout();
+      }, 1000);
+    }
 
-        if (parentObject.name == 'about') {
-          setTimeout(function() {
-            self.scene.remove(self.um.uiHome);
-            self.um.reset(self.um.uiAbout);
-            self._openAboutUI();
-            self._currentScene = 'about';
-          }, 1000);
-        } else if (parentObject.name == 'game') {
-          setTimeout(function() {
-            self.scene.remove(self.um.uiHome);
-            self._openGameUI();
-            self._currentScene = 'game';
-            self._generateFruit();
-          }, 1000);
-        }
-      }
-    } else if (this._currentScene == 'about') {
-      var intersects;
-      if (intersects = this._hasIntersection(event)) {
-        console.log('hitted!')
-        var parentObject = intersects[0].object.parent;
-        console.log(parentObject.name)
-        parentObject.drop(true);
-         
-        //this.uiHome.children[0].sliced = true;
-        if (parentObject.name == 'return') {
-          setTimeout(function() {
-            self.scene.remove(self.um.uiAbout);
-            self.um.reset(self.um.uiHome);
-            self._openHomeUI();
-            self._currentScene = 'home';
-          }, 1000);
-        }
-      }
-    } else if (this._currentScene == 'game') {
-      var intersects;
-      if (intersects = this._hasIntersection(event)) {
-        console.log('hitted!')
-        var parentObject = intersects[0].object.parent;
-        console.log(parentObject.name)
-        parentObject.drop(true);
-      }
-    };
   },
 
   _generateFruit: function() {
     var self = this;
-    console.log(this.um.uiGame)
-    if (this._currentScene == 'game') {
-      var fruit = self.loader.cloneObject('apple');
-      fruit.reset();
-      fruit.rotationDelta = new THREE.Vector3(0, 0.1, 0);
-      fruit.position.set(0, -500, 100);
-      fruit.speed = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 2+20, 0);
-      this.um.uiGame.add(fruit);
-      setTimeout(function() {self._generateFruit();}, 1500);
-    } 
+    var fruit = new Fruit(self.loader, 'apple');
+    fruit.reset();
+    fruit.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+    fruit.position.set(0, -500, 100);
+    fruit.speed = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 2+20, 0);
+    this.um.game.add(fruit);
+    setTimeout(function() {self._generateFruit();}, 1500);
   },
 
   onDocumentMouseMove: function() {
-  
+
   },
 
   _buildIntersectList: function() {
