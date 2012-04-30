@@ -43,9 +43,6 @@ function Game(opts) {
   $(this.container).append(this.stats.domElement);
 
   // register events
-  //document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);
-  //var gameScene = this.container.childNodes[0];
-  //gameScene.addEventListener('mousedown', this.onDocumentMouseDown.bind(this), false);
   $('#container').mousedown(this.onDocumentMouseDown.bind(this));
 
   this.controls = new THREE.TrackballControls(this.camera);
@@ -53,15 +50,23 @@ function Game(opts) {
 
 Game.prototype = {
   initScene:function() {
-    this._currentScene = 'home';
+    //this._currentScene = 'home';
+    console.log(this.loader);
+    //this.scene.add(new Fruit(this.loader, 'apple'));
+
+    this.fsm = StateMachine.create({
+      initial: 'home',
+      events: [
+        { name: 'enterAbout', from : 'home', to: 'about' } ,
+        { name: 'startGame',  from : 'home', to: 'game'  } ,
+        { name: 'exitGame',   from : 'game', to: 'home'  } ,
+        //{ name: '' ,        from : '', to: ''          } ,
+      ]});
     //this._initUI();
-    //
-    this.um = new UIManager();
-    console.log('initing UIs');
-    this.um.init(this.loader);
-    this._initCanvas();
-    this._openHomeUI();
-    this._openTestUI();
+    //this.um = new UIManager();
+    //this.um.init(this.loader);
+    //this._initCanvas();
+    //this._openHomeUI();
   },
 
   _initCanvas: function() {
@@ -95,10 +100,6 @@ Game.prototype = {
     this.scene.add(this.um.uiGame);
   },
 
-  _openTestUI: function() {
-    //this.scene.add(this.uiTest);
-  },
-
   _openAboutUI: function() {
     this.scene.add(this.um.uiAbout);
   },
@@ -113,8 +114,8 @@ Game.prototype = {
   },
 
   _update: function() {
-    this._updateUI();
-    this._updateCanvas();
+    //this._updateUI();
+    //this._updateCanvas();
     this._updateCamera();
     this.stats.update();
   },
@@ -165,15 +166,15 @@ Game.prototype = {
   },
 
   onDocumentMouseDown: function(event) {
+    var self = this;
+    event.preventDefault();
+    // eggcache Firefox
     if (!event.offsetX) {
       event.offsetX = event.clientX - $(event.target).position().left;
       event.offsetY = event.clientY - $(event.target).position().top;
     }
-    console.log(event)
 
-    var self = this;
-    event.preventDefault();
-    console.log(event.offsetX)
+    console.log(this.fsm.current);
 
     if (this._currentScene == 'home') {
       var intersects;
@@ -282,4 +283,3 @@ Game.prototype = {
     return false;
   },
 };
-
