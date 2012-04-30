@@ -44,6 +44,8 @@ function Game(opts) {
 
   // register events
   $('#container').mousedown(this.onDocumentMouseDown.bind(this));
+  $('#container').mouseup(this.onDocumentMouseUp.bind(this));
+  $('#container').mousemove(this.onDocumentMouseMove.bind(this));
 
   this.controls = new THREE.TrackballControls(this.camera);
 }
@@ -84,7 +86,6 @@ Game.prototype = {
 
     image = this.loader.images['bg1'];
     start_ring_image = this.loader.images['ringStart'];
-    console.log(image)
 
     this.bgCanvas.drawLayer(0, image);
     this.bgCanvas.drawLayer(1, start_ring_image);
@@ -153,7 +154,59 @@ Game.prototype = {
     this.renderer.render(this.scene, this.camera);
   },
 
+  onDocumentMouseUp: function(event) {
+    this._mouseDown = false;
+    console.log(event.offsetX, event.offsetY);
+  },
+
+  onDocumentMouseMove: function(event) {
+    var self = this;
+    //console.log(event.offsetX, event.offsetY);
+    if (this._mouseDown) {
+      var offX, offY;
+      if (!event.offsetX) {
+        offX = event.clientX - $(event.target).position().left;
+        offY = event.clientY - $(event.target).position().top;
+      } else {
+        offX = event.offsetX;
+        offY = event.offsetY;
+      }
+
+      var intersects;
+      if (intersects = this._hasIntersection(offX, offY)) {
+        var parentObject = intersects[0].object.parent;
+        console.log('hitted:', parentObject.name);
+        parentObject.drop(true);
+
+        if (parentObject.name == 'about') {
+          setTimeout(function() {
+            self.um.remove('home');
+            self.um.reset(self.um['about']);
+            self.um.add('about');
+            self.fsm.enterAbout();
+          }, 1000);
+        } else if (parentObject.name == 'game') {
+          setTimeout(function() {
+            self.um.remove('home');
+            self.um.add('game');
+            self.fsm.startGame();
+            self._generateFruit();
+          }, 1000);
+        } else if (parentObject.name == 'return') {
+          setTimeout(function() {
+            self.um.remove('about');
+            self.um.reset(self.um['home']);
+            self.um.add('home');
+            self.fsm.exitAbout();
+          }, 1000);
+        }
+      }
+
+    }
+  },
+
   onDocumentMouseDown: function(event) {
+    this._mouseDown = true;
     var self = this;
     event.preventDefault();
     // eggcache Firefox
@@ -171,30 +224,30 @@ Game.prototype = {
     if (intersects = this._hasIntersection(offX, offY)) {
       var parentObject = intersects[0].object.parent;
       console.log('hitted:', parentObject.name);
-    parentObject.drop(true);
+      parentObject.drop(true);
 
-    if (parentObject.name == 'about') {
-      setTimeout(function() {
-        self.um.remove('home');
-        self.um.reset(self.um['about']);
-        self.um.add('about');
-        self.fsm.enterAbout();
-      }, 1000);
-    } else if (parentObject.name == 'game') {
-      setTimeout(function() {
-        self.um.remove('home');
-        self.um.add('game');
-        self.fsm.startGame();
-        self._generateFruit();
-      }, 1000);
-    } else if (parentObject.name == 'return') {
-      setTimeout(function() {
-        self.um.remove('about');
-        self.um.reset(self.um['home']);
-        self.um.add('home');
-        self.fsm.exitAbout();
-      }, 1000);
-    }
+      if (parentObject.name == 'about') {
+        setTimeout(function() {
+          self.um.remove('home');
+          self.um.reset(self.um['about']);
+          self.um.add('about');
+          self.fsm.enterAbout();
+        }, 1000);
+      } else if (parentObject.name == 'game') {
+        setTimeout(function() {
+          self.um.remove('home');
+          self.um.add('game');
+          self.fsm.startGame();
+          self._generateFruit();
+        }, 1000);
+      } else if (parentObject.name == 'return') {
+        setTimeout(function() {
+          self.um.remove('about');
+          self.um.reset(self.um['home']);
+          self.um.add('home');
+          self.fsm.exitAbout();
+        }, 1000);
+      }
     }
 
   },
@@ -208,10 +261,6 @@ Game.prototype = {
     fruit.speed = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 2+20, 0);
     this.um.game.add(fruit);
     setTimeout(function() {self._generateFruit();}, 1500);
-  },
-
-  onDocumentMouseMove: function() {
-
   },
 
   _buildIntersectList: function() {
