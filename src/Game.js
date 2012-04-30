@@ -161,14 +161,16 @@ Game.prototype = {
     if (!event.offsetX) {
       offX = event.clientX - $(event.target).position().left;
       offY = event.clientY - $(event.target).position().top;
+    } else {
+      offX = event.offsetX;
+      offY = event.offsetY;
     }
 
     console.log(this.fsm.current);
     var intersects;
-    if (intersects = this._hasIntersection(event)) {
+    if (intersects = this._hasIntersection(offX, offY)) {
       var parentObject = intersects[0].object.parent;
       console.log('hitted:', parentObject.name);
-    }
     parentObject.drop(true);
 
     if (parentObject.name == 'about') {
@@ -192,6 +194,7 @@ Game.prototype = {
         self.um.add('home');
         self.fsm.exitAbout();
       }, 1000);
+    }
     }
 
   },
@@ -220,9 +223,9 @@ Game.prototype = {
     return intersectList;
   },
 
-  _hasIntersection: function(event) {
-    var mouseX = (event.offsetX/ this.width) * 2 - 1;
-    var mouseY = -(event.offsetY/ this.height) * 2 + 1;
+  _hasIntersection: function(x, y) {
+    var mouseX = (x/ this.width) * 2 - 1;
+    var mouseY = -(y/ this.height) * 2 + 1;
 
     var vector = new THREE.Vector3( mouseX, mouseY, 0.5 );
     this.projector.unprojectVector( vector, this.camera );
