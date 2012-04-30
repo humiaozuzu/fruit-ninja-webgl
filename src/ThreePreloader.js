@@ -15,15 +15,17 @@ function ThreePreloader(options) {
 
     // load images
     for (var imageName in this.options.images) {
-      console.log('Loading:', this.options.images[imageName]);
+      //console.log('Loading:', this.options.images[imageName]);
       var image = new Image();
-      image.onload = function(imageName) {
+      image.onload = (function(imageName, image) {
         return function(){
+          console.log(image);
           self.images[imageName] = image; 
           self.loaded();
         };
-      }(imageName);
+      })(imageName, image);
       image.src = this.options.images[imageName];
+      console.log('Loading:', this.options.images[imageName]);
     }
 
     // load models
