@@ -1,4 +1,9 @@
+/*
+ * Main function that dectect screen size, preload resouces and init the game
+ */
+
 window.onload = function() {
+  // check browser webgl support
   if (!Detector.webgl) {
     Detector.addGetWebGLMessage();
   }
@@ -15,15 +20,10 @@ window.onload = function() {
     height = width / aspect -20;
   }
 
-  var gameStart = function(x, y) {
-    if (x == y) {
-      console.log('loaded!!!')
-    }
-    console.log('Resource loading...')
-  }
-
+/*
+ * callback function that start the game with screen size and loaded resouces
+ */
   function startGame() {
-    console.log(123)
     var opts = {
       width: width,
       height: height,
@@ -35,10 +35,14 @@ window.onload = function() {
     game.renderLoop();
   };
 
+/*
+ * Callback function that showing the progress of loading resouces
+ */
   function showProgress(total, loaded) {
     console.log(loaded+'/'+total);
   };
 
+  // initialize the prelaoder with resouces paths
   var loader = new ThreePreloader({
     images: {
       bg1: 'images/bg_i_heart_sensei_1280_960.jpg',
@@ -65,6 +69,4 @@ window.onload = function() {
     onProgress: showProgress,
   });
   loader.load();
-  //var resourceLoader = new ResourceLoader();
-  //resourceLoader.load(gameStart);
 };

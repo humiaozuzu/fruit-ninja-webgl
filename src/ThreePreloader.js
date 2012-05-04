@@ -1,14 +1,22 @@
+/*
+ * Resource preloader for fruit-ninja-webgl, mainly preload images, 
+ * sounds and json fruit models for the game. 
+ */
+
 function ThreePreloader(options) {
   this.options = options;
   this.images = {};
   this.objects = {};
   this.sounds = {};
   this.loadedCount = 0;
+  this.totalCount = 0;
 
+/*
+ * Load all resources with the paramenter with options parameter
+ */
   this.load = function() {
     var self = this;
     // get total resource count
-    this.totalCount = 0;
     this.totalCount += Object.keys(this.options.images).length;
     this.totalCount += Object.keys(this.options.objects).length;
     this.totalCount += Object.keys(this.options.sounds).length;
@@ -30,7 +38,7 @@ function ThreePreloader(options) {
     for (var objectName in this.options.objects) {
       console.log('Loading:', this.options.objects[objectName]);
       var loader = new THREE.JSONLoader();
-      loader.load(self.options.objects[objectName], function(objectName) {
+      loader.load(this.options.objects[objectName], function(objectName) {
         return function(geometry) {
           self.objects[objectName] = geometry;
           self.loaded();
@@ -39,6 +47,10 @@ function ThreePreloader(options) {
     }
   };
 
+/*
+ * When an image/json/sound is loaded, this function is called to
+ * calculate loaded resources count and invoke callback functions
+ */
   this.loaded = function() {
     this.loadedCount += 1;
     this.options.onProgress(this.totalCount, this.loadedCount);
