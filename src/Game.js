@@ -52,23 +52,89 @@ function Game(opts) {
 
 Game.prototype = {
   initScene:function() {
-    //this._currentScene = 'home';
     console.log(this.loader);
     //this.scene.add(new Fruit(this.loader, 'apple'));
 
+    console.log('Initializing UI manager for game!')
+    this.um = new UIManager(this.scene);
+    this.um.init(this.loader);
+
+    console.log('Initializing Canvas for game!')
+    this._initCanvas();
+    //this.um.add('home');
+    //this._test();
+
+    console.log('Creating fsm for game!')
     this.fsm = StateMachine.create({
       initial: 'home',
       events: [
-        { name: 'enterAbout', from : 'home', to: 'about' } ,
-        { name: 'exitAbout',  from : 'about', to: 'home' } ,
-        { name: 'startGame',  from : 'home', to: 'game'  } ,
-        { name: 'exitGame',   from : 'game', to: 'home'  } ,
-        //{ name: '' ,        from : '', to: ''          } ,
-      ]});
-    this.um = new UIManager(this.scene);
-    this.um.init(this.loader);
-    this._initCanvas();
+        { name: 'enterAbout', from : 'home',  to: 'about'},
+        { name: 'exitAbout',  from : 'about', to: 'home' },
+        { name: 'startGame',  from : 'home',  to: 'game' },
+        { name: 'exitGame',   from : 'game',  to: 'home' },
+        //{ name: '' ,        from : '', to: ''          },
+      ],
+      callbacks: {
+        onenterabout : this.enterAboutCallback.bind(this),
+        onleaveabout : this.leaveAboutCallback.bind(this),
+        onenterhome  : this.enterHomeCallback.bind(this),
+        onleavehome  : this.leaveHomeCallback.bind(this),
+        onentergame  : this.enterGameCallback.bind(this),
+        onleavegame  : this.leaveGameCallback.bind(this),
+      }
+    });
+
+  },
+
+  enterAboutCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    this.um.reset(this.um['about']);
+    this.um.add('about');
+  },
+
+  leaveAboutCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    this.um.remove('about');
+  },
+
+  enterHomeCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    this.um.reset(this.um['home']);
     this.um.add('home');
+  },
+
+  leaveHomeCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    this.um.remove('home');
+  },
+
+  enterGameCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    this.um.add('game');
+    console.log(123)
+    this._generateFruit();
+  },
+
+  leaveGameCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+  },
+
+  _test: function() {
+    var sparksEmitter = new SPARKS.Emitter(new SPARKS.SteadyCounter(500));
+
+    var emitterpos = new THREE.Vector3(0,0,0);
+
+    sparksEmitter.addInitializer(new SPARKS.Position( new SPARKS.PointZone( emitterpos ) ) );
+    sparksEmitter.addInitializer(new SPARKS.Lifetime(1,4));
+    sparksEmitter.addInitializer(new SPARKS.Velocity(new SPARKS.PointZone(new THREE.Vector3(0,-50,10))));
+    // TOTRY Set velocity to move away from centroid
+
+    sparksEmitter.addAction(new SPARKS.Age());
+    sparksEmitter.addAction(new SPARKS.Accelerate(0,0,50));
+    sparksEmitter.addAction(new SPARKS.Move()); 
+    sparksEmitter.addAction(new SPARKS.RandomDrift(50,50,2000));
+
+    sparksEmitter.start();
   },
 
   _initCanvas: function() {
@@ -92,18 +158,6 @@ Game.prototype = {
     this.bgCanvas.angle = 0;
     this.bgCanvas.fps = 0;
     this.bgCanvas.needUpdate = true;
-  },
-
-  _openHomeUI: function() {
-    this.scene.add(this.um.uiHome);
-  },
-
-  _openGameUI: function() {
-    this.scene.add(this.um.uiGame);
-  },
-
-  _openAboutUI: function() {
-    this.scene.add(this.um.uiAbout);
   },
 
   renderLoop: function() {
@@ -164,6 +218,7 @@ Game.prototype = {
     //console.log(event.offsetX, event.offsetY);
     if (this._mouseDown) {
       var offX, offY;
+      // compatible with eggcache Firefox
       if (!event.offsetX) {
         offX = event.clientX - $(event.target).position().left;
         offY = event.clientY - $(event.target).position().top;
@@ -175,84 +230,33 @@ Game.prototype = {
       var intersects;
       if (intersects = this._hasIntersection(offX, offY)) {
         var parentObject = intersects[0].object.parent;
-        console.log('hitted:', parentObject.name);
+        console.log('Hitted:', parentObject.name);
         parentObject.drop(true);
 
         if (parentObject.name == 'about') {
           setTimeout(function() {
-            self.um.remove('home');
-            self.um.reset(self.um['about']);
-            self.um.add('about');
             self.fsm.enterAbout();
           }, 1000);
         } else if (parentObject.name == 'game') {
           setTimeout(function() {
-            self.um.remove('home');
-            self.um.add('game');
             self.fsm.startGame();
-            self._generateFruit();
           }, 1000);
         } else if (parentObject.name == 'return') {
           setTimeout(function() {
-            self.um.remove('about');
-            self.um.reset(self.um['home']);
-            self.um.add('home');
             self.fsm.exitAbout();
           }, 1000);
         }
       }
-
     }
   },
 
   onDocumentMouseDown: function(event) {
     this._mouseDown = true;
-    var self = this;
     event.preventDefault();
-    // eggcache Firefox
-    var offX, offY;
-    if (!event.offsetX) {
-      offX = event.clientX - $(event.target).position().left;
-      offY = event.clientY - $(event.target).position().top;
-    } else {
-      offX = event.offsetX;
-      offY = event.offsetY;
-    }
-
-    console.log(this.fsm.current);
-    var intersects;
-    if (intersects = this._hasIntersection(offX, offY)) {
-      var parentObject = intersects[0].object.parent;
-      console.log('hitted:', parentObject.name);
-      parentObject.drop(true);
-
-      if (parentObject.name == 'about') {
-        setTimeout(function() {
-          self.um.remove('home');
-          self.um.reset(self.um['about']);
-          self.um.add('about');
-          self.fsm.enterAbout();
-        }, 1000);
-      } else if (parentObject.name == 'game') {
-        setTimeout(function() {
-          self.um.remove('home');
-          self.um.add('game');
-          self.fsm.startGame();
-          self._generateFruit();
-        }, 1000);
-      } else if (parentObject.name == 'return') {
-        setTimeout(function() {
-          self.um.remove('about');
-          self.um.reset(self.um['home']);
-          self.um.add('home');
-          self.fsm.exitAbout();
-        }, 1000);
-      }
-    }
-
   },
 
   _generateFruit: function() {
+    console.log(123)
     var self = this;
     var fruit = new Fruit(self.loader, 'apple');
     fruit.reset();
