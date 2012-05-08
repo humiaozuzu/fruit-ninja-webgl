@@ -13,10 +13,10 @@ window.onload = function() {
   var height = window.innerHeight;
   var aspect = 1.333;
   if (width / aspect > height) {
-    height -= 20;
+    height -= 40;
     width = height * aspect;
   } else {
-    width -= 20;
+    width -= 40;
     height = width / aspect -20;
   }
 
@@ -49,8 +49,9 @@ window.onload = function() {
       bg1: 'images/bg_i_heart_sensei_1280_960.jpg',
       bg2: 'images/bg_store_1280_960.jpg',
       start: 'images/ring_start.png',
+      about: 'images/ring_about.png',
+      swag: 'images/ring_senseis_swag.png',
       back: 'images/ring_back.png',
-      settings: 'images/ring_settings.png',
       bomb: '/images/bomb_button_red.png',
       // textures for 3d objects
       apple1: 'models/apple/apple_skin.jpg',

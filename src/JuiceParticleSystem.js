@@ -3,9 +3,9 @@ JuiceParticleSystem = function(x, y) {
   pMaterial = 
     new THREE.ParticleBasicMaterial({
     color: 0xFFFFFF,
-    size: 80,
+    size: 100,
     map: THREE.ImageUtils.loadTexture(
-      "images/m_big_juice.png"
+      "images/particles/m_big_juice.png"
     ),
     blending: THREE.AdditiveBlending,
     transparent: true
@@ -14,7 +14,7 @@ JuiceParticleSystem = function(x, y) {
   for (var i = 0; i < 40; i++) {
     var pX = Math.random() * 50 -25,
     pY = Math.random() * 50 -25,
-    pZ = 100,
+    pZ = (i < 10) ? 1000 : -1000,
     particle = new THREE.Vertex(
       new THREE.Vector3(pX, pY, pZ)
     );
@@ -28,7 +28,7 @@ JuiceParticleSystem = function(x, y) {
   THREE.ParticleSystem.call(this, particles, pMaterial);
   this.sortParticles = true;
   this.age = 0;
-  this.life = 10;
+  this.life = 20;
   this.position.set(x, y, 100);
 };
 

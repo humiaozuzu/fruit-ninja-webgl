@@ -34,16 +34,17 @@ function LayeredCanvas(n, width, height) {
     }
 
     if (sceneName == 'home') {
-      this.angle += 0.05;
+      this.angle += 0.02;
       var start = this.loader.images['start'];
       var settings = this.loader.images['settings'];
 
-      this._drawRotateLayer(1, this.loader.images['start'], this.angle, 0, 0, true);
-      this._drawRotateLayer(1, this.loader.images['settings'], this.angle, -300, 0, false);
+      this._drawRotateLayer(1, this.loader.images['swag'], this.angle, 0, 0, true);
+      this._drawRotateLayer(1, this.loader.images['start'], this.angle, -300, 0, false);
+      this._drawRotateLayer(1, this.loader.images['about'], this.angle, 300, 0, false);
     } else if (sceneName == 'about') {
-      this.angle += 0.05;
+      this.angle += 0.02;
       var back = this.loader.images['back'];
-      this._drawRotateLayer(1, this.loader.images['back'], this.angle, 300, -300, true);
+      this._drawRotateLayer(1, this.loader.images['back'], this.angle, 450, -350, true);
     } else if (sceneName == 'game') {
       var bomb = this.loader.images['bomb'];      
       this._drawLayer(1, bomb, 450, -350);

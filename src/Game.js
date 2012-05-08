@@ -47,7 +47,7 @@ function Game(opts) {
     'position'   : 'absolute',
     'left'       : (window.innerWidth - this.width) / 2,
     'top'        : (window.innerHeight - this.height) / 2,
-    'box-shadow' : '0px 5px 25px #000',
+    'box-shadow' : '5px 5px 25px #000',
   });
   $(this.container).append(this.bgCanvas.mainCanvas);
 
@@ -71,7 +71,17 @@ Game.prototype = {
 
     console.log('Initializing UI manager for game!')
     this.um = new UIManager(this.scene);
-    this.um.init(this.loader);
+    this.um.init(this.loader, {
+      home: [
+        { name: 'about', fruit: 'apple', position: new THREE.Vector3(300, 0, 100) },
+        { name: 'game', fruit: 'watermelon', position: new THREE.Vector3(0, 0, 100) },
+        { name: 'swag', fruit: 'banana', position: new THREE.Vector3(-300, 0, 100) },
+      ],
+      about: [
+        { name: 'back', fruit : 'banana', position: new THREE.Vector3(400, -300, 100) },
+      ],
+      game: [],
+    });
 
     console.log('Initializing Canvas for game!')
     this.bgCanvas.init(this.loader, 2);
@@ -175,7 +185,6 @@ Game.prototype = {
 
   onDocumentMouseUp: function(event) {
     this._mouseDown = false;
-    console.log(event.offsetX, event.offsetY);
   },
 
   onDocumentMouseMove: function(event) {
@@ -191,7 +200,10 @@ Game.prototype = {
         offX = event.offsetX;
         offY = event.offsetY;
       }
-      this.prevMouse = {x: offX, y: offY};
+
+      var a = this._getDirection(this.prevMouse[0], this.prevMouse[1], offX, offY);
+      console.log(a)
+
 
       var intersects;
       if (intersects = this._hasIntersection(offX, offY)) {
@@ -219,12 +231,23 @@ Game.prototype = {
           }, 1000);
         }
       }
+      this.prevMouse = [offX, offY];
     }
   },
 
   onDocumentMouseDown: function(event) {
     this._mouseDown = true;
     event.preventDefault();
+    var offX, offY;
+    // compatible with eggcache Firefox
+    if (!event.offsetX) {
+      offX = event.clientX - $(event.target).position().left;
+      offY = event.clientY - $(event.target).position().top;
+    } else {
+      offX = event.offsetX;
+      offY = event.offsetY;
+    }
+    this.prevMouse = [offX, offY];
   },
 
   _generateFruit: function() {

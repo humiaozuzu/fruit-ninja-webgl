@@ -10,6 +10,7 @@ function Fruit(loader, name) {
   this.add(object2);
   this.position.z = 100;
   this.scale.set(2, 2, 2);
+  this.name = name;
 };
 
 Fruit.prototype = new THREE.Object3D();
