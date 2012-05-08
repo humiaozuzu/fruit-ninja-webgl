@@ -68,14 +68,13 @@ function Game(opts) {
 Game.prototype = {
   initScene:function() {
     console.log(this.loader);
-    //this.scene.add(new Fruit(this.loader, 'apple'));
 
     console.log('Initializing UI manager for game!')
     this.um = new UIManager(this.scene);
     this.um.init(this.loader);
 
     console.log('Initializing Canvas for game!')
-    this._initCanvas();
+    this.bgCanvas.init(this.loader, 2);
 
     console.log('Creating fsm for game!')
     this.fsm = StateMachine.create({
@@ -132,20 +131,6 @@ Game.prototype = {
     console.log('from:', from, 'to:', to);
   },
 
-  _initCanvas: function() {
-    var self = this;
-
-
-    image = this.loader.images['bg1'];
-    start_ring_image = this.loader.images['ringStart'];
-
-    this.bgCanvas.drawLayer(0, image);
-    this.bgCanvas.drawLayer(1, start_ring_image);
-    this.bgCanvas.angle = 0;
-    this.bgCanvas.fps = 0;
-    this.bgCanvas.needUpdate = true;
-  },
-
   renderLoop: function() {
     var self = this;
     (function loop() {
@@ -166,20 +151,9 @@ Game.prototype = {
     this.stats.update();
   },
 
-
   _updateCanvas: function() {
-    this.bgCanvas.fps += 1;
-    if (this.bgCanvas.fps % 2 == 0) {
-      this.bgCanvas.needUpdate = true;
-      this.bgCanvas.angle += 0.05;
-      //this.bgCanvas.drawRotateLayer(1, this.loader.images[1], this.bgCanvas.angle, 0, 0, true);
-      //this.bgCanvas.drawRotateLayer(1, this.loader.images[2], this.bgCanvas.angle, -300, 0, false);
-      //this.bgCanvas.drawRotateLayer(1, this.loader.images[3], this.bgCanvas.angle, 300, 0, false);
-    }
-     
     if (this.bgCanvas.needUpdate) {
-      this.bgCanvas.update();
-      this.bgCanvas.needUpdate = false;
+      this.bgCanvas.update(this.fsm.current);
     }
   },
 
@@ -189,7 +163,7 @@ Game.prototype = {
     });
   },
 
- _updateCamera: function() {
+  _updateCamera: function() {
     //this.controls.update();
     this.camera.lookAt(this.scene.position);
   },
@@ -260,9 +234,9 @@ Game.prototype = {
     fruit.reset();
     fruit.rotationDelta = new THREE.Vector3(0, 0.1, 0);
     fruit.position.set(0, -500, 100);
-    fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 2+20, 0);
+    fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 4+20, 0);
     this.um.game.add(fruit);
-    setTimeout(function() {self._generateFruit();}, 1500);
+    setTimeout(function() {self._generateFruit();}, 1200);
   },
 
   _getDirection: function(x1, y1, x2, y2) {

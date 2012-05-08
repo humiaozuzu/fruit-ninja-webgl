@@ -45,9 +45,14 @@ window.onload = function() {
   // initialize the prelaoder with resouces paths
   var loader = new ThreePreloader({
     images: {
+      // textures for 2d canvas
       bg1: 'images/bg_i_heart_sensei_1280_960.jpg',
       bg2: 'images/bg_store_1280_960.jpg',
-      ringStart: 'images/ring_start.png',
+      start: 'images/ring_start.png',
+      back: 'images/ring_back.png',
+      settings: 'images/ring_settings.png',
+      bomb: '/images/bomb_button_red.png',
+      // textures for 3d objects
       apple1: 'models/apple/apple_skin.jpg',
       apple2: 'models/apple/apple_stem.jpg',
       apple3: 'models/apple/apple_half.jpg',
@@ -55,6 +60,9 @@ window.onload = function() {
       banana2: 'models/banana/banana_half.jpg',
       watermelon1 : 'models/watermelon/watermelon_skin.jpg',
       watermelon2 : 'models/watermelon/watermelon_half.jpg',
+      // textures particle systems
+      watermelonJuice: 'images/particles/w_big_juice.png',
+      orangeJuice: 'images/particles/o_big_juice.png',
     },
     objects: {
       apple1: 'models/apple/apple_half1.js',
