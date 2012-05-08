@@ -13,35 +13,36 @@ function Fruit(loader, name) {
 };
 
 Fruit.prototype = new THREE.Object3D();
+Fruit.prototype.constructor = Fruit;
 
 /*
- * If the fruit is not sliced, update it with its rotation delta and speed;
- * If sliced, update its two half-fruit with rotation delta and speed. 
+ * If the fruit is not sliced, update it with its rotation delta and velocity;
+ * If sliced, update its two half-fruit with rotation delta and velocity. 
  */
 Fruit.prototype.update = function() {
   if (!this.sliced) {
     this.rotation.addSelf(this.rotationDelta);
-    if (this.speed) {
-      this.position.addSelf(this.speed);
-      this.speed.y -= 9.8 / 30;
+    if (this.velocity) {
+      this.position.addSelf(this.velocity);
+      this.velocity.y -= 9.8 / 30;
     }
   }
   else {
     this.children.forEach(function(fruit) {
       fruit.rotation.addSelf(fruit.rotationDelta);
-      fruit.position.addSelf(fruit.speed);
-      fruit.speed.y -= 9.8 / 30;
+      fruit.position.addSelf(fruit.velocity);
+      fruit.velocity.y -= 9.8 / 30;
     });        
   }
 };
 
 /*
- * Reset speed/position of fruit and its composed half
+ * Reset velocity/position of fruit and its composed half
  */
 Fruit.prototype.reset = function() {
   this.sliced = false;
   this.position.set(0, 0, 100);
-  this.speed = undefined;
+  this.velocity = undefined;
   this.children.forEach(function(fruit) {
     fruit.position.set(0, 0, 0);
   });
@@ -57,9 +58,9 @@ Fruit.prototype.drop = function(sliced) {
     this.sliced = true;
     this.children.forEach(function(fruit) {
       fruit.rotationDelta = fruit.parent.rotationDelta;
-      fruit.speed = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 5, 0);
+      fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 5, 0);
     });
   } else {
-    this.speed = new THREE.Vector3(Math.random() * 5 - 10, Math.random() * 5, 0);
+    this.velocity = new THREE.Vector3(Math.random() * 5 - 10, Math.random() * 5, 0);
   }
 }

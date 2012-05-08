@@ -1,4 +1,7 @@
 function Game(opts) {
+/*
+ * Create 3D webgl scene and 2d canvas and status monitor
+ */
   this.width     = opts.width;
   this.height    = opts.height;
   this.container = opts.container;
@@ -9,6 +12,9 @@ function Game(opts) {
 
   // create scene
   this.scene = new THREE.Scene();
+
+  // store splashed juice particle systems
+  this.splashedJuice = [];
 
   // create camera
   //this.camera = new THREE.OrthographicCamera(40, this.width / this.height, 1, 1000000);
@@ -35,6 +41,15 @@ function Game(opts) {
     'z-index': '11',
   });
 
+  // create background 2d canvas
+  this.bgCanvas = new LayeredCanvas(2, this.width, this.height);
+  $(this.bgCanvas.mainCanvas).css({
+    'position'   : 'absolute',
+    'left'       : (window.innerWidth - this.width) / 2,
+    'top'        : (window.innerHeight - this.height) / 2,
+    'box-shadow' : '0px 5px 25px #000',
+  });
+  $(this.container).append(this.bgCanvas.mainCanvas);
 
   // create stats
   this.stats = new Stats();
@@ -61,8 +76,6 @@ Game.prototype = {
 
     console.log('Initializing Canvas for game!')
     this._initCanvas();
-    //this.um.add('home');
-    //this._test();
 
     console.log('Creating fsm for game!')
     this.fsm = StateMachine.create({
@@ -119,36 +132,9 @@ Game.prototype = {
     console.log('from:', from, 'to:', to);
   },
 
-  _test: function() {
-    var sparksEmitter = new SPARKS.Emitter(new SPARKS.SteadyCounter(500));
-
-    var emitterpos = new THREE.Vector3(0,0,0);
-
-    sparksEmitter.addInitializer(new SPARKS.Position( new SPARKS.PointZone( emitterpos ) ) );
-    sparksEmitter.addInitializer(new SPARKS.Lifetime(1,4));
-    sparksEmitter.addInitializer(new SPARKS.Velocity(new SPARKS.PointZone(new THREE.Vector3(0,-50,10))));
-    // TOTRY Set velocity to move away from centroid
-
-    sparksEmitter.addAction(new SPARKS.Age());
-    sparksEmitter.addAction(new SPARKS.Accelerate(0,0,50));
-    sparksEmitter.addAction(new SPARKS.Move()); 
-    sparksEmitter.addAction(new SPARKS.RandomDrift(50,50,2000));
-
-    sparksEmitter.start();
-  },
-
   _initCanvas: function() {
     var self = this;
 
-    // create background canvas
-    this.bgCanvas = new LayeredCanvas(2, this.width, this.height);
-    $(this.bgCanvas.mainCanvas).css({
-      'position'   : 'absolute',
-      'left'       : (window.innerWidth - this.width) / 2,
-      'top'        : (window.innerHeight - this.height) / 2,
-      'box-shadow' : '0px 2px 35px rgba(0, 0, 0, 0.85)',
-    });
-    $(this.container).append(this.bgCanvas.mainCanvas);
 
     image = this.loader.images['bg1'];
     start_ring_image = this.loader.images['ringStart'];
@@ -170,11 +156,16 @@ Game.prototype = {
   },
 
   _update: function() {
+    var self = this;
+    this.splashedJuice.forEach(function(juice) {
+      juice.update(self.scene);
+    })
     this._updateUI();
     this._updateCanvas();
     this._updateCamera();
     this.stats.update();
   },
+
 
   _updateCanvas: function() {
     this.bgCanvas.fps += 1;
@@ -198,7 +189,7 @@ Game.prototype = {
     });
   },
 
-  _updateCamera: function() {
+ _updateCamera: function() {
     //this.controls.update();
     this.camera.lookAt(this.scene.position);
   },
@@ -226,10 +217,17 @@ Game.prototype = {
         offX = event.offsetX;
         offY = event.offsetY;
       }
+      this.prevMouse = {x: offX, y: offY};
 
       var intersects;
       if (intersects = this._hasIntersection(offX, offY)) {
         var parentObject = intersects[0].object.parent;
+        console.log(intersects)
+        // splashed juice particle effect
+        this.ps = new JuiceParticleSystem(parentObject.position.x, parentObject.position.y);
+        this.scene.add(this.ps);
+        this.splashedJuice.push(this.ps);
+
         console.log('Hitted:', parentObject.name);
         parentObject.drop(true);
 
@@ -262,16 +260,25 @@ Game.prototype = {
     fruit.reset();
     fruit.rotationDelta = new THREE.Vector3(0, 0.1, 0);
     fruit.position.set(0, -500, 100);
-    fruit.speed = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 2+20, 0);
+    fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 2+20, 0);
     this.um.game.add(fruit);
     setTimeout(function() {self._generateFruit();}, 1500);
+  },
+
+  _getDirection: function(x1, y1, x2, y2) {
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+
+    return Math.atan2(dx,  dy) / Math.PI * 180;
   },
 
   _buildIntersectList: function() {
     var intersectList = []; 
 
     this.um[this.fsm.current].children.forEach(function(fruit) {
-      intersectList = intersectList.concat(fruit.children); 
+      if (!fruit.sliced) {
+        intersectList = intersectList.concat(fruit.children); 
+      }
     });
     return intersectList;
   },
@@ -280,10 +287,10 @@ Game.prototype = {
     var mouseX = (x/ this.width) * 2 - 1;
     var mouseY = -(y/ this.height) * 2 + 1;
 
-    var vector = new THREE.Vector3( mouseX, mouseY, 0.5 );
+    var vector = new THREE.Vector3( mouseX, mouseY, 1 );
     this.projector.unprojectVector( vector, this.camera );
 
-    var ray = new THREE.Ray( vector, new THREE.Vector3(0, 0, 1));
+    var ray = new THREE.Ray(vector, new THREE.Vector3(0, 0, 1));
 
     var intersects = ray.intersectObjects(this._buildIntersectList());
     if (intersects.length  > 0) {
