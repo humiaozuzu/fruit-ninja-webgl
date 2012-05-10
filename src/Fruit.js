@@ -1,11 +1,11 @@
-function Fruit(loader, name) {
+function Fruit(loader, kind, name) {
 /*
- * A Fruit object is consist of 2 half-fruit models, when this class is initialized,
- * two half-fruit mesh to add into an Object3D.
+ * A Fruit object consists of 2 half-fruit models, when this class is initialized,
+ * two half-fruit mesh are added into one Object3D.
  */
   THREE.Object3D.call(this);
-  var object1 = new THREE.Mesh(loader.objects[name+'1'], new THREE.MeshFaceMaterial());
-  var object2 = new THREE.Mesh(loader.objects[name+'2'], new THREE.MeshFaceMaterial());
+  var object1 = new THREE.Mesh(loader.objects[kind+'1'], new THREE.MeshFaceMaterial());
+  var object2 = new THREE.Mesh(loader.objects[kind+'2'], new THREE.MeshFaceMaterial());
   this.add(object1);
   this.add(object2);
   this.position.z = 100;
@@ -46,6 +46,7 @@ Fruit.prototype.reset = function() {
   this.velocity = undefined;
   this.children.forEach(function(fruit) {
     fruit.position.set(0, 0, 0);
+    fruit.rotation.set(0, 0, 0);
   });
 }
 
@@ -54,11 +55,32 @@ Fruit.prototype.reset = function() {
  * If this fruit is sliced, then drop its two half-fruit.
  * Otherwise, drop the complete fruit.
  */
-Fruit.prototype.drop = function(sliced) {
+Fruit.prototype.drop = function(sliced, direction) {
   if (sliced) {
     this.sliced = true;
+    var x = this.rotation.x % (Math.PI * 2);
+    var y = this.rotation.y % (Math.PI * 2);
+    this.rotation.set(0, 0, 0);
     this.children.forEach(function(fruit) {
-      fruit.rotationDelta = fruit.parent.rotationDelta;
+      // TODO: set direction accroding to different fruit kind
+      direction = direction < 0 ? direction : direction + Math.PI;
+      // 1/2 PI ~ 3/2 PI set to PI
+      if (Math.abs(x - Math.PI) < (Math.PI / 2)) {
+        fruit.rotation.x = Math.PI; 
+      } else {
+        fruit.rotation.x = 0;
+      }
+      if (Math.abs(y - Math.PI) < (Math.PI / 2)) {
+        fruit.rotation.y = Math.PI; 
+      } else {
+        fruit.rotation.y = 0;
+      }
+      console.log(x, y);
+      console.log(fruit.rotation.x, fruit.rotation.y);
+
+      fruit.rotation.z = direction;
+      //fruit.eulerOrder = 'ZYX';
+      fruit.rotationDelta = new THREE.Vector3(0, Math.random() * 0.2 - 0.1, 0);
       fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 5, 0);
     });
   } else {
