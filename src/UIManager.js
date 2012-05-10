@@ -4,81 +4,63 @@ function UIManager(scene) {
 
   this.init = function(loader, options) {
     this.options = options;
+    console.log(options);
 
-    //for (uiName in options) {
-      //console.log('Creating UI for:', name);
-      //this.ui[uiName] = new THREE.Object3D();
-      //for (fruitName in options[uiName]) {
-        //this.ui[uiName].add(new Fruit(loader, options))
-      //}
-    //}
+    for (uiName in options) {
+      console.log('Creating UI for:', uiName);
+      // create Object3D that holds fruits
+      this.ui[uiName] = new THREE.Object3D();
 
-    // init menu entry for home
-    this.home = new THREE.Object3D();
-    this.home.name = 'home';
-    var gameEntry = new Fruit(loader, 'banana');
-    this.home.add(gameEntry);
-    var aboutEntry = new Fruit(loader, 'apple');
-    this.home.add(aboutEntry);
-    var settingsEntry = new Fruit(loader, 'watermelon');
-    this.home.add(settingsEntry);
-    // some shortcut
-    this.home.gameEntry = gameEntry;
-    this.home.aboutEntry = aboutEntry;
-    this.home.settingsEntry = settingsEntry;
-    this.reset(this.home);
+      // add fruits into ui
+      for (var i = 0; i < options[uiName].length; i++) {
+        this.ui[uiName].add(new Fruit(loader, options[uiName][i]['fruit'], options[uiName][i]['name']));
+      }
 
-    console.log(settingsEntry);
-
-    // init about
-    this.about = new THREE.Object3D();
-    this.about.name = 'about';
-    var returnEntry = new Fruit(loader, 'banana');
-    console.log(returnEntry)
-    this.about.add(returnEntry);
-    // set shortcut
-    this.about.returnEntry = returnEntry;
-    this.reset(this.about);
-  
-    // init game
-    this.game = new THREE.Object3D();
-    this.game.name = 'game';
+      // reset current ui
+      this.reset(uiName);
+    }
+    console.log('All UI created successfully:', this.ui);
   };
 
   this.add = function(name) {
-    this.scene.add(this[name]);
+    this.scene.add(this.ui[name]);
   }; 
 
   this.remove = function(name) {
-    this.scene.remove(this[name]);
+    this.scene.remove(this.ui[name]);
   };
 
-  this.reset = function(uiObject) {
-    var name = uiObject.name;
-
-    if (name == 'home') {
-      uiObject.gameEntry.reset();
-      uiObject.gameEntry.rotation.set(0, 0, 0.4);
-      uiObject.gameEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
-      uiObject.gameEntry.position.x = -300;
-      uiObject.gameEntry.name = 'game';
-
-      uiObject.aboutEntry.reset();
-      uiObject.aboutEntry.rotation.set(0, 0, 0);
-      uiObject.aboutEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
-      uiObject.aboutEntry.position.x = 300;
-      uiObject.aboutEntry.name = 'about';
-
-      uiObject.settingsEntry.reset();
-      uiObject.settingsEntry.rotation.set(1.57, -0.5, 0)
-      uiObject.settingsEntry.rotationDelta = new THREE.Vector3(0, 0, 0.1);
-      uiObject.settingsEntry.name = 'settings';
-    } else if (name = 'about') {
-      uiObject.returnEntry.reset();
-      uiObject.returnEntry.rotationDelta = new THREE.Vector3(0, 0.1, 0);
-      uiObject.returnEntry.position.x = 450;
-      uiObject.returnEntry.position.y = -350;
-      uiObject.returnEntry.name = 'return';
+/*
+ * Reset all fruit in ui
+ */
+  this.reset = function(uiName) {
+    console.log('Resetting UI:', uiName)
+    console.log(this.options[uiName])
+    for (var i = 0; i < this.options[uiName].length; i++) {
+      var object = this.ui[uiName].getChildByName(this.options[uiName][i]['name']);
+      object.reset();
+      object.position.copy(this.options[uiName][i]['position']);
+      //console.log(this.options[uiName][i]['position']);
+      //console.log(object)
+      object.rotationDelta = new THREE.Vector3(0, 0.1, 0);
     }
   };
+
+  this.update = function(uiName) {
+    this.ui[uiName].children.forEach(function(fruit) {
+      fruit.update();
+    });
+  };
+
+  this.getIntersectionList = function(uiName) {
+    var intersectList = []; 
+
+    this.ui[uiName].children.forEach(function(fruit) {
+      if (!fruit.sliced) {
+        intersectList = intersectList.concat(fruit.children); 
+      }
+    });
+    return intersectList;
+  };
+
 };
