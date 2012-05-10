@@ -74,13 +74,17 @@ Game.prototype = {
     this.um.init(this.loader, {
       home: [
         { name: 'about', fruit: 'apple', position: new THREE.Vector3(300, 0, 100) },
-        { name: 'game', fruit: 'watermelon', position: new THREE.Vector3(0, 0, 100) },
+        { name: 'game', fruit: 'watermelon', position: new THREE.Vector3(0, 0, 200) },
         { name: 'swag', fruit: 'banana', position: new THREE.Vector3(-300, 0, 100) },
       ],
       about: [
+        { name: 'back', fruit : 'banana', position: new THREE.Vector3(450, -350, 100) },
+      ],
+      swag: [
         { name: 'back', fruit : 'banana', position: new THREE.Vector3(400, -300, 100) },
       ],
       game: [],
+      pausedGame: []
     });
 
     console.log('Initializing Canvas for game!')
@@ -110,7 +114,7 @@ Game.prototype = {
 
   enterAboutCallback: function(event, from, to, msg) {
     console.log('from:', from, 'to:', to);
-    this.um.reset(this.um['about']);
+    this.um.reset('about');
     this.um.add('about');
   },
 
@@ -121,7 +125,7 @@ Game.prototype = {
 
   enterHomeCallback: function(event, from, to, msg) {
     console.log('from:', from, 'to:', to);
-    this.um.reset(this.um['home']);
+    this.um.reset('home');
     this.um.add('home');
   },
 
@@ -133,7 +137,6 @@ Game.prototype = {
   enterGameCallback: function(event, from, to, msg) {
     console.log('from:', from, 'to:', to);
     this.um.add('game');
-    console.log(123)
     this._generateFruit();
   },
 
@@ -168,9 +171,7 @@ Game.prototype = {
   },
 
   _updateUI: function() {
-    this.um[this.fsm.current].children.forEach(function(fruit) {
-      fruit.update();
-    });
+    this.um.update(this.fsm.current);
   },
 
   _updateCamera: function() {
@@ -201,21 +202,20 @@ Game.prototype = {
         offY = event.offsetY;
       }
 
-      var a = this._getDirection(this.prevMouse[0], this.prevMouse[1], offX, offY);
-      console.log(a)
-
+      var dir = this._getDirection(this.prevMouse[0], this.prevMouse[1], offX, offY);
+      //console.log(dir)
 
       var intersects;
       if (intersects = this._hasIntersection(offX, offY)) {
         var parentObject = intersects[0].object.parent;
         console.log(intersects)
         // splashed juice particle effect
-        this.ps = new JuiceParticleSystem(parentObject.position.x, parentObject.position.y);
+        this.ps = new JuiceParticleSystem(parentObject.position.x, parentObject.position.y, dir);
         this.scene.add(this.ps);
         this.splashedJuice.push(this.ps);
 
         console.log('Hitted:', parentObject.name);
-        parentObject.drop(true);
+        parentObject.drop(true, dir);
 
         if (parentObject.name == 'about') {
           setTimeout(function() {
@@ -223,9 +223,10 @@ Game.prototype = {
           }, 1000);
         } else if (parentObject.name == 'game') {
           setTimeout(function() {
+            console.log(1234)
             self.fsm.startGame();
           }, 1000);
-        } else if (parentObject.name == 'return') {
+        } else if (parentObject.name == 'back') {
           setTimeout(function() {
             self.fsm.exitAbout();
           }, 1000);
@@ -255,10 +256,10 @@ Game.prototype = {
     var self = this;
     var fruit = new Fruit(self.loader, 'apple');
     fruit.reset();
-    fruit.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+    fruit.rotationDelta = new THREE.Vector3(0.1, 0.1, 0);
     fruit.position.set(0, -500, 100);
     fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 4+20, 0);
-    this.um.game.add(fruit);
+    this.um.ui.game.add(fruit);
     setTimeout(function() {self._generateFruit();}, 1200);
   },
 
@@ -266,18 +267,7 @@ Game.prototype = {
     var dx = x2 - x1;
     var dy = y2 - y1;
 
-    return Math.atan2(dx,  dy) / Math.PI * 180;
-  },
-
-  _buildIntersectList: function() {
-    var intersectList = []; 
-
-    this.um[this.fsm.current].children.forEach(function(fruit) {
-      if (!fruit.sliced) {
-        intersectList = intersectList.concat(fruit.children); 
-      }
-    });
-    return intersectList;
+    return Math.atan2(dx,  dy);
   },
 
   _hasIntersection: function(x, y) {
@@ -289,7 +279,7 @@ Game.prototype = {
 
     var ray = new THREE.Ray(vector, new THREE.Vector3(0, 0, 1));
 
-    var intersects = ray.intersectObjects(this._buildIntersectList());
+    var intersects = ray.intersectObjects(this.um.getIntersectionList(this.fsm.current));
     if (intersects.length  > 0) {
       return intersects;
     }
