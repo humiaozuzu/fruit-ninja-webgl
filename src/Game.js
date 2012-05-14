@@ -42,7 +42,7 @@ function Game(opts) {
   });
 
   // create background 2d canvas
-  this.bgCanvas = new LayeredCanvas(2, this.width, this.height);
+  this.bgCanvas = new LayeredCanvas(5, this.width, this.height);
   $(this.bgCanvas.mainCanvas).css({
     'position'   : 'absolute',
     'left'       : (window.innerWidth - this.width) / 2,
@@ -59,6 +59,7 @@ function Game(opts) {
 
   // register events
   $('#container').mousedown(this.onDocumentMouseDown.bind(this));
+  $('#paused').mousedown(this.onPausedFrameMouseDown.bind(this));
   $('#container').mouseup(this.onDocumentMouseUp.bind(this));
   $('#container').mousemove(this.onDocumentMouseMove.bind(this));
 
@@ -84,11 +85,12 @@ Game.prototype = {
         { name: 'back', fruit : 'banana', position: new THREE.Vector3(400, -300, 100) },
       ],
       game: [],
-      pausedGame: []
+      paused: []
     });
 
     console.log('Initializing Canvas for game!')
     this.bgCanvas.init(this.loader, 2);
+    this.loadPausedFrame();
 
     console.log('Creating fsm for game!')
     this.fsm = StateMachine.create({
@@ -97,7 +99,10 @@ Game.prototype = {
         { name: 'enterAbout', from : 'home',  to: 'about'},
         { name: 'exitAbout',  from : 'about', to: 'home' },
         { name: 'startGame',  from : 'home',  to: 'game' },
-        { name: 'exitGame',   from : 'game',  to: 'home' },
+        { name: 'pauseGame',   from : 'game',  to: 'paused' },
+        { name: 'returnGame',   from : 'paused',  to: 'game' },
+        { name: 'exitGame',   from : 'paused',  to: 'home' },
+        { name: 'retryGame',   from : 'paused',  to: 'game' },
         //{ name: '' ,        from : '', to: ''          },
       ],
       callbacks: {
@@ -107,6 +112,8 @@ Game.prototype = {
         onleavehome  : this.leaveHomeCallback.bind(this),
         onentergame  : this.enterGameCallback.bind(this),
         onleavegame  : this.leaveGameCallback.bind(this),
+        onenterpaused: this.enterPausedCallback.bind(this),
+        onleavepaused: this.leavePausedCallback.bind(this),
       }
     });
 
@@ -136,12 +143,60 @@ Game.prototype = {
 
   enterGameCallback: function(event, from, to, msg) {
     console.log('from:', from, 'to:', to);
-    this.um.add('game');
-    this._generateFruit();
+    if (from != 'paused') {
+      this.um.reset('game');
+      this.um.add('game');
+      this.bgCanvas.updateScore(12);
+      this._generateFruit();
+    } else {
+      this._generateFruit();
+    }
   },
 
   leaveGameCallback: function(event, from, to, msg) {
     console.log('from:', from, 'to:', to);
+  },
+
+  enterPausedCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    $('#paused').css({
+      'left'             : (window.innerWidth - this.width) / 2,
+      'top'              : (window.innerHeight - this.height) / 2,
+      'width': this.width,
+      'height': this.height,
+    });
+  },
+
+  leavePausedCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    $('#paused').css({
+      'left'             : 10000,
+      'top'              : 10000,
+    });
+    if (to == 'home') {
+      this.um.remove('game');
+    }
+  },
+
+  loadPausedFrame: function() {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = 1280;
+    canvas.height = 960;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";  
+    ctx.fillRect (0, 0, 1280, 960); 
+    ctx.drawImage(this.loader.images['play'], this.bgCanvas._canvasX(-200)-128, this.bgCanvas._canvasY(0)-128, 256, 256);
+    ctx.drawImage(this.loader.images['retry'], this.bgCanvas._canvasX(200)-128, this.bgCanvas._canvasY(0)-128, 256, 256);
+    ctx.drawImage(this.loader.images['quit'], this.bgCanvas._canvasX(550)-64, this.bgCanvas._canvasY(-400)-64);
+
+    // scaled canvas
+    var canvas2 = document.createElement('canvas');
+    var ctx2 = canvas2.getContext('2d');
+    canvas2.width = this.width;
+    canvas2.height = this.height;
+    ctx2.drawImage(canvas, 0, 0, this.width, this.height);
+    var pausedFrame = $('#paused');
+    $(pausedFrame).append(canvas2);
   },
 
   renderLoop: function() {
@@ -214,6 +269,8 @@ Game.prototype = {
         this.scene.add(this.ps);
         this.splashedJuice.push(this.ps);
 
+        this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, 1, dir);
+
         console.log('Hitted:', parentObject.name);
         parentObject.drop(true, dir);
 
@@ -223,7 +280,6 @@ Game.prototype = {
           }, 1000);
         } else if (parentObject.name == 'game') {
           setTimeout(function() {
-            console.log(1234)
             self.fsm.startGame();
           }, 1000);
         } else if (parentObject.name == 'back') {
@@ -249,10 +305,85 @@ Game.prototype = {
       offY = event.offsetY;
     }
     this.prevMouse = [offX, offY];
+
+    // 
+    var mouseX = (offX/ this.width) * 2 - 1;
+    var mouseY = -(offY/ this.height) * 2 + 1;
+
+    var vector = new THREE.Vector3( mouseX, mouseY, 1 );
+    this.projector.unprojectVector( vector, this.camera );
+    
+    if (this.fsm.current == 'game') {
+      // check if clicked pause button
+      if (this._clicked(vector.x, vector.y, -600, -450, 'square', 22)) {
+        this.fsm.pauseGame();
+      }
+
+    }
+  },
+
+  onPausedFrameMouseDown: function(event) {
+    event.preventDefault();
+    var offX, offY;
+    // compatible with eggcache Firefox
+    if (!event.offsetX) {
+      offX = event.clientX - $(event.target).position().left;
+      offY = event.clientY - $(event.target).position().top;
+    } else {
+      offX = event.offsetX;
+      offY = event.offsetY;
+    }
+    this.prevMouse = [offX, offY];
+
+    // 
+    var mouseX = (offX/ this.width) * 2 - 1;
+    var mouseY = -(offY/ this.height) * 2 + 1;
+
+    var vector = new THREE.Vector3( mouseX, mouseY, 1 );
+    this.projector.unprojectVector( vector, this.camera );
+    
+    if (this.fsm.current == 'paused') {
+      console.log(vector.x, vector.y)
+      // check if clicked pause button
+      if (this._clicked(vector.x, vector.y, 550, -405, 'round', 55)) {
+        console.log(123) 
+        this.fsm.exitGame();
+      }
+
+      // check if clicked play button
+      if (this._clicked(vector.x, vector.y, -200, 0, 'square', 128)) {
+        this.fsm.returnGame();
+      }
+
+      // check if clicked retry button
+      if (this._clicked(vector.x, vector.y, 200, 0, 'square', 128)) {
+        this.fsm.exitGame();
+      }
+    }
+  },
+
+  _clicked: function(mouseX, mouseY, centerX, centerY, shape, radius) {
+    var diffX = Math.abs(mouseX - centerX);
+    var diffY = Math.abs(mouseY - centerY);
+
+    if (shape == 'round') {
+      var distanceSquare = Math.pow(diffX, 2) + Math.pow(diffY, 2); 
+      if (Math.sqrt(distanceSquare) < radius) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (shape == 'square') {
+      if (diffX < radius && diffY < radius) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
 
   _generateFruit: function() {
-    console.log(123)
+    //console.log(123)
     var self = this;
     var fruit = new Fruit(self.loader, 'apple');
     fruit.reset();
@@ -260,7 +391,9 @@ Game.prototype = {
     fruit.position.set(0, -500, 100);
     fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 4+20, 0);
     this.um.ui.game.add(fruit);
-    setTimeout(function() {self._generateFruit();}, 1200);
+    if (this.fsm.current == 'game') {
+      setTimeout(function() {self._generateFruit();}, 1200);
+    }
   },
 
   _getDirection: function(x1, y1, x2, y2) {

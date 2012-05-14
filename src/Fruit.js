@@ -11,7 +11,7 @@ function Fruit(loader, kind, name) {
   this.position.z = 100;
   this.scale.set(2, 2, 2);
   this.name = name;
-};
+}
 
 Fruit.prototype = new THREE.Object3D();
 Fruit.prototype.constructor = Fruit;
@@ -48,7 +48,7 @@ Fruit.prototype.reset = function() {
     fruit.position.set(0, 0, 0);
     fruit.rotation.set(0, 0, 0);
   });
-}
+};
 
 /*
  * Drop a fruit.
@@ -75,9 +75,10 @@ Fruit.prototype.drop = function(sliced, direction) {
       } else {
         fruit.rotation.y = 0;
       }
-      console.log(x, y);
-      console.log(fruit.rotation.x, fruit.rotation.y);
+      //console.log(x, y);
+      //console.log(fruit.rotation.x, fruit.rotation.y);
 
+      //fruit.up = new THREE.Vector3(Math.sin(direction), Math.cos(direction), 0);
       fruit.rotation.z = direction;
       //fruit.eulerOrder = 'ZYX';
       fruit.rotationDelta = new THREE.Vector3(0, Math.random() * 0.2 - 0.1, 0);
@@ -86,4 +87,4 @@ Fruit.prototype.drop = function(sliced, direction) {
   } else {
     this.velocity = new THREE.Vector3(Math.random() * 5 - 10, Math.random() * 5, 0);
   }
-}
+};

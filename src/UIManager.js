@@ -34,8 +34,11 @@ function UIManager(scene) {
  * Reset all fruit in ui
  */
   this.reset = function(uiName) {
-    console.log('Resetting UI:', uiName)
-    console.log(this.options[uiName])
+    console.log('Resetting UI:', uiName);
+    console.log(this.options[uiName]);
+    if (uiName == 'game') {
+      this.ui[uiName].children = [];
+    }
     for (var i = 0; i < this.options[uiName].length; i++) {
       var object = this.ui[uiName].getChildByName(this.options[uiName][i]['name']);
       object.reset();
@@ -62,5 +65,4 @@ function UIManager(scene) {
     });
     return intersectList;
   };
-
-};
+}
