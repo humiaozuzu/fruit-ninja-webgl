@@ -11,6 +11,7 @@ function Fruit(loader, kind, name) {
   this.position.z = 100;
   this.scale.set(2, 2, 2);
   this.name = name;
+  this.kind = kind;
 }
 
 Fruit.prototype = new THREE.Object3D();
@@ -63,7 +64,7 @@ Fruit.prototype.drop = function(sliced, direction) {
     this.rotation.set(0, 0, 0);
     this.children.forEach(function(fruit) {
       // TODO: set direction accroding to different fruit kind
-      direction = direction < 0 ? direction : direction + Math.PI;
+      //direction = direction < 0 ? direction : direction + Math.PI;
       // 1/2 PI ~ 3/2 PI set to PI
       if (Math.abs(x - Math.PI) < (Math.PI / 2)) {
         fruit.rotation.x = Math.PI; 
@@ -75,12 +76,15 @@ Fruit.prototype.drop = function(sliced, direction) {
       } else {
         fruit.rotation.y = 0;
       }
-      //console.log(x, y);
-      //console.log(fruit.rotation.x, fruit.rotation.y);
 
-      //fruit.up = new THREE.Vector3(Math.sin(direction), Math.cos(direction), 0);
-      fruit.rotation.z = direction;
-      //fruit.eulerOrder = 'ZYX';
+      if (fruit.parent.kind == 'apple' || fruit.parent.kind == 'watermelon') {
+        console.log(direction)
+        fruit.rotation.z = -direction + Math.PI / 2;
+        console.log(123)
+      } else {
+        fruit.rotation.z = direction;
+      }
+
       fruit.rotationDelta = new THREE.Vector3(0, Math.random() * 0.2 - 0.1, 0);
       fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 5, 0);
     });

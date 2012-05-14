@@ -19,3 +19,20 @@ a {
 #container {
   /*cursor: url(../images/lightsaber2.png), auto;*/
 }
+
+#paused {
+  position: absolute;
+  top: -10000px;
+  left: -10000px;
+  /*width: 800px;*/
+  /*height: 600px;*/
+  z-index: 100;
+  opacity: 0.6;
+  background-color: black;
+}
+
+#paused img {
+  margin-left: 5%;
+  margin-right: 5%;
+  margin-top: 30%;
+}

@@ -67,6 +67,9 @@ window.onload = function() {
       banana2: 'models/banana/banana_half.jpg',
       watermelon1 : 'models/watermelon/watermelon_skin.jpg',
       watermelon2 : 'models/watermelon/watermelon_half.jpg',
+      kiwi1: 'models/kiwi/kiwi_skin.jpg',
+      kiwi2: 'models/kiwi/kiwi_half.jpg',
+      kiwi3: 'models/kiwi/kiwi_bottom.jpg',
       // textures particle systems
       watermelonJuice: 'images/particles/w_big_juice.png',
       orangeJuice: 'images/particles/o_big_juice.png'
@@ -77,7 +80,9 @@ window.onload = function() {
       banana1: 'models/banana/banana_half1.js',
       banana2: 'models/banana/banana_half2.js',
       watermelon1 : 'models/watermelon/watermelon_half1.js',
-      watermelon2 : 'models/watermelon/watermelon_half2.js'
+      watermelon2 : 'models/watermelon/watermelon_half2.js',
+      kiwi1: 'models/kiwi/kiwi_half1.js',
+      kiwi2: 'models/kiwi/kiwi_half2.js'
     },
     sounds: {},
     onSuccess: startGame,

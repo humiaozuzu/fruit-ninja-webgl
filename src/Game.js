@@ -74,8 +74,8 @@ Game.prototype = {
     this.um = new UIManager(this.scene);
     this.um.init(this.loader, {
       home: [
-        { name: 'about', fruit: 'apple', position: new THREE.Vector3(300, 0, 100) },
-        { name: 'game', fruit: 'watermelon', position: new THREE.Vector3(0, 0, 200) },
+        { name: 'about', fruit: 'apple', position: new THREE.Vector3(300, 0, 100), rotation: new THREE.Vector3(Math.PI/2, 0, Math.PI/4) },
+        { name: 'game', fruit: 'kiwi', position: new THREE.Vector3(0, 0, 200), rotation: new THREE.Vector3(Math.PI/2, 0, 0)},
         { name: 'swag', fruit: 'banana', position: new THREE.Vector3(-300, 0, 100) },
       ],
       about: [
@@ -385,7 +385,14 @@ Game.prototype = {
   _generateFruit: function() {
     //console.log(123)
     var self = this;
-    var fruit = new Fruit(self.loader, 'apple');
+    var ran = Math.random() * 3;
+    if (ran < 1) {
+      var fruit = new Fruit(self.loader, 'kiwi');
+    } else if (ran < 2) {
+      var fruit = new Fruit(self.loader, 'banana');
+    } else if (ran < 3) {
+      var fruit = new Fruit(self.loader, 'watermelon');
+    }
     fruit.reset();
     fruit.rotationDelta = new THREE.Vector3(0.1, 0.1, 0);
     fruit.position.set(0, -500, 100);
@@ -400,7 +407,7 @@ Game.prototype = {
     var dx = x2 - x1;
     var dy = y2 - y1;
 
-    return Math.atan2(dx,  dy);
+    return Math.atan2(dy, dx);
   },
 
   _hasIntersection: function(x, y) {

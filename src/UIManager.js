@@ -42,7 +42,10 @@ function UIManager(scene) {
     for (var i = 0; i < this.options[uiName].length; i++) {
       var object = this.ui[uiName].getChildByName(this.options[uiName][i]['name']);
       object.reset();
-      object.position.copy(this.options[uiName][i]['position']);
+      object.position.copy(this.options[uiName][i].position);
+      if (this.options[uiName][i].rotation) {
+        object.rotation.copy(this.options[uiName][i].rotation)
+      }
       //console.log(this.options[uiName][i]['position']);
       //console.log(object)
       object.rotationDelta = new THREE.Vector3(0, 0.1, 0);

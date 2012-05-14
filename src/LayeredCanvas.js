@@ -73,7 +73,7 @@ function LayeredCanvas(n, width, height) {
     //console.log(x, y);
     this.juice.push({image: this.loader.images['splash1'], x: x, y: y, animations: [
                     { animateFuc: this.animations.alpha, timingFuc: this.timingFuctions.linear(-0.02, 1) },
-                    { animateFuc: this.animations.rotate, timingFuc: this.timingFuctions.linear(0, -rotation) },
+                    { animateFuc: this.animations.rotate, timingFuc: this.timingFuctions.linear(0, rotation) },
     ]});
   };
 
