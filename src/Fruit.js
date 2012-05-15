@@ -10,6 +10,7 @@ function Fruit(loader, kind, name) {
   this.add(object2);
   this.position.z = 100;
   this.scale.set(2, 2, 2);
+  this.rotationDelta = new THREE.Vector3(0, 0, 0);
   this.name = name;
   this.kind = kind;
 }
@@ -66,21 +67,25 @@ Fruit.prototype.drop = function(sliced, direction) {
       // TODO: set direction accroding to different fruit kind
       //direction = direction < 0 ? direction : direction + Math.PI;
       // 1/2 PI ~ 3/2 PI set to PI
+      var counter = 0;
       if (Math.abs(x - Math.PI) < (Math.PI / 2)) {
         fruit.rotation.x = Math.PI; 
+        counter += 1;
       } else {
         fruit.rotation.x = 0;
       }
       if (Math.abs(y - Math.PI) < (Math.PI / 2)) {
         fruit.rotation.y = Math.PI; 
+        counter += 1;
       } else {
         fruit.rotation.y = 0;
       }
 
-      if (fruit.parent.kind == 'apple' || fruit.parent.kind == 'watermelon') {
-        console.log(direction)
-        fruit.rotation.z = -direction + Math.PI / 2;
-        console.log(123)
+      if (fruit.parent.kind == 'apple' || 
+          fruit.parent.kind == 'watermelon' || 
+          fruit.kind == 'orange') 
+      {
+        fruit.rotation.z = -direction + Math.PI / 2 + Math.PI / 2 * counter;
       } else {
         fruit.rotation.z = direction;
       }

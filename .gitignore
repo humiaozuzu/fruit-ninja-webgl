@@ -1,7 +1,8 @@
 .DS_Store
 *.swp
 *.pyc
+*.c4d
 models/kiwi
 models/strawberry
-models/orange
 models/pear
+models/untitled\ folder

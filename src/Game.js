@@ -74,15 +74,15 @@ Game.prototype = {
     this.um = new UIManager(this.scene);
     this.um.init(this.loader, {
       home: [
-        { name: 'about', fruit: 'apple', position: new THREE.Vector3(300, 0, 100), rotation: new THREE.Vector3(Math.PI/2, 0, Math.PI/4) },
-        { name: 'game', fruit: 'kiwi', position: new THREE.Vector3(0, 0, 200), rotation: new THREE.Vector3(Math.PI/2, 0, 0)},
-        { name: 'swag', fruit: 'banana', position: new THREE.Vector3(-300, 0, 100) },
+        { name: 'about', fruit: 'orange', position: new THREE.Vector3(300, 0, 100), rotation: new THREE.Vector3(0, 0, 0), rotationDelta: new THREE.Vector3(0.02, 0, 0.01), eulerOrder: 'ZYX' },
+        { name: 'game', fruit: 'apple', position: new THREE.Vector3(0, 0, 200), rotation: new THREE.Vector3(0, 0, 0.3), rotationDelta: new THREE.Vector3(0, 0.04, 0) },
+        { name: 'swag', fruit: 'watermelon', position: new THREE.Vector3(-300, 0, 100), rotation: new THREE.Vector3(0, 0, 0), rotationDelta: new THREE.Vector3(0.02, 0.01, 0) },
       ],
       about: [
-        { name: 'back', fruit : 'banana', position: new THREE.Vector3(450, -350, 100) },
+        { name: 'back', fruit : 'banana', position: new THREE.Vector3(450, -350, 100), rotation: new THREE.Vector3(0, 0, 0.3), rotationDelta: new THREE.Vector3(0, 0.08, 0)},
       ],
       swag: [
-        { name: 'back', fruit : 'banana', position: new THREE.Vector3(400, -300, 100) },
+        { name: 'back', fruit : 'banana', position: new THREE.Vector3(400, -300, 100), rotation: new THREE.Vector3(0, 0, 0.3), rotationDelta: new THREE.Vector3(0, 0.08, 0)},
       ],
       game: [],
       paused: []
@@ -101,7 +101,7 @@ Game.prototype = {
         { name: 'startGame',  from : 'home',  to: 'game' },
         { name: 'pauseGame',   from : 'game',  to: 'paused' },
         { name: 'returnGame',   from : 'paused',  to: 'game' },
-        { name: 'exitGame',   from : 'paused',  to: 'home' },
+        { name: 'exitGame',   from : ['paused', 'game'],  to: 'home' },
         { name: 'retryGame',   from : 'paused',  to: 'game' },
         //{ name: '' ,        from : '', to: ''          },
       ],
@@ -134,6 +134,10 @@ Game.prototype = {
     console.log('from:', from, 'to:', to);
     this.um.reset('home');
     this.um.add('home');
+    if (from == 'paused' || from == 'game') {
+      this.bgCanvas.score = 0;
+      this.bgCanvas.time = 60;
+    }
   },
 
   leaveHomeCallback: function(event, from, to, msg) {
@@ -146,15 +150,22 @@ Game.prototype = {
     if (from != 'paused') {
       this.um.reset('game');
       this.um.add('game');
-      this.bgCanvas.updateScore(12);
-      this._generateFruit();
+      this.bgCanvas.updateScore();
+      this.bgCanvas.addNotice('time');
+      //setTimeout(this.bgCanvas.addNotice('go'), 2000);
+      this._updateTime();
+      setTimeout(this._generateFruit(), 160000);
     } else {
+      this._updateTime();
       this._generateFruit();
     }
   },
 
   leaveGameCallback: function(event, from, to, msg) {
     console.log('from:', from, 'to:', to);
+    if (to == 'home') {
+      this.um.remove('game');
+    }
   },
 
   enterPausedCallback: function(event, from, to, msg) {
@@ -265,11 +276,35 @@ Game.prototype = {
         var parentObject = intersects[0].object.parent;
         console.log(intersects)
         // splashed juice particle effect
-        this.ps = new JuiceParticleSystem(parentObject.position.x, parentObject.position.y, dir);
-        this.scene.add(this.ps);
-        this.splashedJuice.push(this.ps);
+        if (parentObject.kind != 'banana') {
+          this.ps = new JuiceParticleSystem(parentObject.position.x, parentObject.position.y, dir, parentObject.kind, true);
+          this.scene.add(this.ps);
+          this.splashedJuice.push(this.ps);
+        }
 
-        this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, 1, dir);
+        // add score
+        if (this.fsm.current == 'game') {
+          this.bgCanvas.score += 4;
+          this.bgCanvas.updateScore();
+        }
+
+        // add splashed juice to background
+        if (parentObject.kind == 'watermelon') {
+          var juiceColor = 'Red';
+          var juiceType = Math.ceil(Math.random()*2);
+          this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, juiceColor, juiceType, dir);
+        } else if (parentObject.kind == 'apple' ||
+                   parentObject.kind == 'lemon' || 
+                   parentObject.kind == 'pear'
+                  ) {
+          var juiceColor = 'Yellow';
+          var juiceType = Math.ceil(Math.random()*2);
+          this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, juiceColor, juiceType, dir);
+        } else if (parentObject.kind == 'orange') {
+          var juiceColor = 'Orange';
+          var juiceType = Math.ceil(Math.random()*2);
+          this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, juiceColor, juiceType, dir);
+        }
 
         console.log('Hitted:', parentObject.name);
         parentObject.drop(true, dir);
@@ -384,12 +419,15 @@ Game.prototype = {
 
   _generateFruit: function() {
     //console.log(123)
+    if (this.fsm.current != 'game') { 
+      return;
+    }
     var self = this;
     var ran = Math.random() * 3;
     if (ran < 1) {
-      var fruit = new Fruit(self.loader, 'kiwi');
+      var fruit = new Fruit(self.loader, 'apple');
     } else if (ran < 2) {
-      var fruit = new Fruit(self.loader, 'banana');
+      var fruit = new Fruit(self.loader, 'orange');
     } else if (ran < 3) {
       var fruit = new Fruit(self.loader, 'watermelon');
     }
@@ -398,9 +436,20 @@ Game.prototype = {
     fruit.position.set(0, -500, 100);
     fruit.velocity = new THREE.Vector3(Math.random() * 16 - 8, Math.random() * 4+20, 0);
     this.um.ui.game.add(fruit);
-    if (this.fsm.current == 'game') {
-      setTimeout(function() {self._generateFruit();}, 1200);
+    setTimeout(function() {self._generateFruit();}, 1200);
+  },
+
+  _updateTime: function() {
+    if (this.fsm.current != 'game') { 
+      return;
     }
+    if (this.bgCanvas.time == 0) {
+      this.fsm.exitGame();
+    }
+    console.log(123)
+    var self = this;
+    this.bgCanvas.updateTime();
+    setTimeout(function() {self._updateTime();}, 1000);
   },
 
   _getDirection: function(x1, y1, x2, y2) {

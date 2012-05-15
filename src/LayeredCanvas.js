@@ -3,7 +3,8 @@ function LayeredCanvas(n, width, height) {
   this.mainContext = this.mainCanvas.getContext('2d');
   this.mainCanvas.width = this.width = width;
   this.mainCanvas.height = this.height = height;
-  this.scoce = 0;
+  this.score = 0;
+  this.time = 60;
 
   // create canvas layers
   this.canvases = new Array(n);
@@ -24,8 +25,7 @@ function LayeredCanvas(n, width, height) {
 
     // add backgound image
     this._drawOnLayer(0, loader.images['bg1']); // First layer
-    this.updateScore(123456789);
-    //this._drawOnLayer(2, this.scoreCanvas); // First layer
+    this.updateScore();
 
     // slashed juice on the second layer
     this.juice = [];
@@ -46,7 +46,8 @@ function LayeredCanvas(n, width, height) {
       game: [
         {image: loader.images['pause'], x: -600, y: -450},
         {image: loader.images['score'], x: 0, y: 0, noShortCut: true},
-        {image: this.scoreCanvas, x: 128, y: 0, noShortCut: true},
+        {image: this.scoreCanvas, x: 64, y: 10, noShortCut: true},
+        {image: this.timeCanvas, x: 640, y: 440 },
       ],
       about: [
         {image: loader.images['back'], x: 450, y: -350, animations: [
@@ -61,19 +62,45 @@ function LayeredCanvas(n, width, height) {
   this.scoreCanvas.width = 128 * 4;
   this.scoreCanvas.height = 64;
 
-  this.updateScore = function(score) {
+  this.timeCanvas = document.createElement('canvas');
+  this.timeContext = this.timeCanvas.getContext('2d');
+  this.timeCanvas.width = 128 * 2;
+  this.timeCanvas.height = 64;
+
+  this.updateScore = function() {
+    var score = this.score;
     var table = [0, 9, 4, 1, 3, 2, 5, 6, 7, 8]; 
     score = score + '';
+    this.scoreContext.clearRect(0, 0, this.scoreCanvas.width, this.scoreCanvas.height);
     for (var i = 0; i < score.length; i++) {
       this.scoreContext.drawImage(this.loader.images['numbers'], 38 * table[score[i]], 0, 38, 64, i*38, 0, 38, 64);
     }
   };
 
-  this.addSplashedJuice = function(x, y, type, rotation) {
+  this.updateTime = function() {
+    var time = this.time;
+    var table = [0, 9, 4, 1, 3, 2, 5, 6, 7, 8]; 
+    time = time + '';
+    this.timeContext.clearRect(0, 0, this.timeCanvas.width, this.timeCanvas.height);
+    for (var i = 0; i < time.length; i++) {
+      this.timeContext.drawImage(this.loader.images['numbers'], 38 * table[time[i]], 0, 38, 64, i*38, 0, 38, 64);
+    }
+    this.time -= 1;
+  };
+
+  this.addSplashedJuice = function(x, y, color, type, rotation) {
     //console.log(x, y);
-    this.juice.push({image: this.loader.images['splash1'], x: x, y: y, animations: [
-                    { animateFuc: this.animations.alpha, timingFuc: this.timingFuctions.linear(-0.02, 1) },
+    console.log(color+type);
+
+    this.juice.push({image: this.loader.images['splash'+color+type], x: x, y: y, animations: [
+                    { animateFuc: this.animations.alpha, timingFuc: this.timingFuctions.linear(-0.01, 1) },
                     { animateFuc: this.animations.rotate, timingFuc: this.timingFuctions.linear(0, rotation) },
+    ]});
+  };
+
+  this.addNotice = function(name) {
+    this.juice.push({image: this.loader.images[name], x: 0, y: 0, animations: [
+                    { animateFuc: this.animations.alpha, timingFuc: this.timingFuctions.linear(-0.02, 1) },
     ]});
   };
 

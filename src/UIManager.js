@@ -48,7 +48,10 @@ function UIManager(scene) {
       }
       //console.log(this.options[uiName][i]['position']);
       //console.log(object)
-      object.rotationDelta = new THREE.Vector3(0, 0.1, 0);
+      object.rotationDelta.copy(this.options[uiName][i].rotationDelta);
+      if (this.options[uiName][i].eulerOrder) {
+        object.eulerOrder = this.options[uiName][i].eulerOrder;
+      }
     }
   };
 

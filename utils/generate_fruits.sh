@@ -17,3 +17,6 @@ python convert_obj_three.py -i ../models/pear/pear_half2.obj -o ../models/pear/p
 
 python convert_obj_three.py -i ../models/watermelon/watermelon_half1.obj -o ../models/watermelon/watermelon_half1.js
 python convert_obj_three.py -i ../models/watermelon/watermelon_half2.obj -o ../models/watermelon/watermelon_half2.js
+
+python convert_obj_three.py -i ../models/lemon/lemon_half1.obj -o ../models/lemon/lemon_half1.js
+python convert_obj_three.py -i ../models/lemon/lemon_half2.obj -o ../models/lemon/lemon_half2.js
