@@ -52,6 +52,7 @@ window.onload = function() {
       about: 'images/ring_about.png',
       swag: 'images/ring_senseis_swag.png',
       back: 'images/ring_back.png',
+      retry2: 'images/ring_retry.png',
       quit: 'images/quit_button.png',
       pause: 'images/pause_button.png',
       play: 'images/play_button.png',

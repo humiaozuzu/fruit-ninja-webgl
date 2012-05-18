@@ -42,7 +42,7 @@ function Game(opts) {
   });
 
   // create background 2d canvas
-  this.bgCanvas = new LayeredCanvas(5, this.width, this.height);
+  this.bgCanvas = new LayeredCanvas(this.width, this.height);
   $(this.bgCanvas.mainCanvas).css({
     'position'   : 'absolute',
     'left'       : (window.innerWidth - this.width) / 2,
@@ -84,12 +84,60 @@ Game.prototype = {
       swag: [
         { name: 'back', fruit : 'banana', position: new THREE.Vector3(400, -300, 100), rotation: new THREE.Vector3(0, 0, 0.3), rotationDelta: new THREE.Vector3(0, 0.08, 0)},
       ],
+      score: [
+        { name: 'back', fruit : 'banana', position: new THREE.Vector3(200, -300, 100), rotation: new THREE.Vector3(0, 0, 0.3), rotationDelta: new THREE.Vector3(0, 0.08, 0)},
+        { name: 'retry', fruit : 'watermelon', position: new THREE.Vector3(-200, -300, 100), rotation: new THREE.Vector3(0, 0, 0.3), rotationDelta: new THREE.Vector3(0, 0.08, 0)},
+      ],
       game: [],
       paused: []
     });
 
+    this.gametime = 3;
     console.log('Initializing Canvas for game!')
-    this.bgCanvas.init(this.loader, 2);
+    //this.bgCanvas.init(this.loader, 2);
+    // background image
+    this.bgCanvas.addLayer('static', 'global', [
+                           { image: this.loader.images['bg1'], x: 0, y: 0, noShortCut: true}
+    ]);
+    // slashed juice
+    this.bgCanvas.addLayer('animated', 'global', []);
+    // scene-based rotating circle
+    this.bgCanvas.addLayer('animated', 'sceneBased', {
+      home: [
+        {image: this.loader.images['game'], x: 0, y: 0, animations: [
+          { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0.02, 0) },
+      ]},
+      {image: this.loader.images['swag'], x: -300, y: 0, animations: [
+        { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0.02, 0) },
+      ]},
+      {image: this.loader.images['about'], x: 300, y: 0, animations: [
+        { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0.02, 0) },
+      ]}
+      ],
+      about: [
+        {image: this.loader.images['back'], x: 450, y: -350, animations: [
+        { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0.02, 0) },
+      ]}
+      ],
+      score: [
+        {image: this.loader.images['back'], x: 200, y: -300, animations: [
+        { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0.02, 0) },
+      ]},
+        {image: this.loader.images['retry2'], x: -200, y: -300, animations: [
+        { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0.02, 0) },
+      ]}
+      ]
+    });
+    this.score = new CanvasNumber(this.loader, 0);
+    this.time = new CanvasNumber(this.loader, this.gametime);
+    this.bgCanvas.addLayer('static', 'sceneBased', {
+      game: [
+        {image: this.loader.images['pause'], x: -600, y: -450},
+        {image: this.loader.images['score'], x: 0, y: 0, noShortCut: true},
+        {image: this.score.canvas, x: 64, y: 10, noShortCut: true},
+        {image: this.time.canvas, x: 640, y: 440 }
+      ],
+    });
     this.loadPausedFrame();
 
     console.log('Creating fsm for game!')
@@ -102,7 +150,9 @@ Game.prototype = {
         { name: 'pauseGame',   from : 'game',  to: 'paused' },
         { name: 'returnGame',   from : 'paused',  to: 'game' },
         { name: 'exitGame',   from : ['paused', 'game'],  to: 'home' },
-        { name: 'retryGame',   from : 'paused',  to: 'game' },
+        { name: 'retryGame',   from : ['paused', 'score'],  to: 'game' },
+        { name: 'endGame',   from : 'game',  to: 'score' },
+        { name: 'returnHome',   from : 'score',  to: 'home' },
         //{ name: '' ,        from : '', to: ''          },
       ],
       callbacks: {
@@ -114,6 +164,8 @@ Game.prototype = {
         onleavegame  : this.leaveGameCallback.bind(this),
         onenterpaused: this.enterPausedCallback.bind(this),
         onleavepaused: this.leavePausedCallback.bind(this),
+        onenterscore: this.enterScoreCallback.bind(this),
+        onleavescore: this.leaveScoreCallback.bind(this),
       }
     });
 
@@ -134,9 +186,9 @@ Game.prototype = {
     console.log('from:', from, 'to:', to);
     this.um.reset('home');
     this.um.add('home');
-    if (from == 'paused' || from == 'game') {
-      this.bgCanvas.score = 0;
-      this.bgCanvas.time = 60;
+    if (from == 'paused' || from == 'score') {
+      this.score.update(0);
+      this.time.update(this.gametime);
     }
   },
 
@@ -150,8 +202,8 @@ Game.prototype = {
     if (from != 'paused') {
       this.um.reset('game');
       this.um.add('game');
-      this.bgCanvas.updateScore();
-      this.bgCanvas.addNotice('time');
+      //this.bgCanvas.updateScore();
+      //this.bgCanvas.addNotice('time');
       //setTimeout(this.bgCanvas.addNotice('go'), 2000);
       this._updateTime();
       setTimeout(this._generateFruit(), 160000);
@@ -163,7 +215,7 @@ Game.prototype = {
 
   leaveGameCallback: function(event, from, to, msg) {
     console.log('from:', from, 'to:', to);
-    if (to == 'home') {
+    if (to == 'score') {
       this.um.remove('game');
     }
   },
@@ -187,6 +239,19 @@ Game.prototype = {
     if (to == 'home') {
       this.um.remove('game');
     }
+  },
+
+  enterScoreCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    this.um.reset('score');
+    this.um.add('score');
+  },
+
+  leaveScoreCallback: function(event, from, to, msg) {
+    console.log('from:', from, 'to:', to);
+    this.um.remove('score');
+    this.score.update(0);
+    this.time.update(this.gametime);
   },
 
   loadPausedFrame: function() {
@@ -231,9 +296,7 @@ Game.prototype = {
   },
 
   _updateCanvas: function() {
-    if (this.bgCanvas.needUpdate) {
-      this.bgCanvas.update(this.fsm.current);
-    }
+    this.bgCanvas.update(this.fsm.current);
   },
 
   _updateUI: function() {
@@ -284,26 +347,42 @@ Game.prototype = {
 
         // add score
         if (this.fsm.current == 'game') {
-          this.bgCanvas.score += 4;
-          this.bgCanvas.updateScore();
+          this.score.add(4);
+          this.bgCanvas.layers[3].needUpdate = true;
+          //this.bgCanvas.updateScore();
         }
 
         // add splashed juice to background
         if (parentObject.kind == 'watermelon') {
           var juiceColor = 'Red';
           var juiceType = Math.ceil(Math.random()*2);
-          this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, juiceColor, juiceType, dir);
+          this.bgCanvas.layers[1].add(
+            {image: this.loader.images['splash'+juiceColor+juiceType], x: parentObject.position.x, y: parentObject.position.y, frame: 60, animations: [
+                { animateFuc: this.bgCanvas.animations.alpha, timingFuc: this.bgCanvas.timingFuctions.linear(-0.01, 1) },
+                { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0, dir) }
+          ]}
+          );
         } else if (parentObject.kind == 'apple' ||
                    parentObject.kind == 'lemon' || 
                    parentObject.kind == 'pear'
                   ) {
           var juiceColor = 'Yellow';
           var juiceType = Math.ceil(Math.random()*2);
-          this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, juiceColor, juiceType, dir);
+          this.bgCanvas.layers[1].add(
+            {image: this.loader.images['splash'+juiceColor+juiceType], x: parentObject.position.x, y: parentObject.position.y, frame: 60, animations: [
+                { animateFuc: this.bgCanvas.animations.alpha, timingFuc: this.bgCanvas.timingFuctions.linear(-0.01, 1) },
+                { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0, dir) }
+          ]}
+          );
         } else if (parentObject.kind == 'orange') {
           var juiceColor = 'Orange';
           var juiceType = Math.ceil(Math.random()*2);
-          this.bgCanvas.addSplashedJuice(parentObject.position.x, parentObject.position.y, juiceColor, juiceType, dir);
+          this.bgCanvas.layers[1].add(
+            {image: this.loader.images['splash'+juiceColor+juiceType], x: parentObject.position.x, y: parentObject.position.y, frame: 60, animations: [
+                { animateFuc: this.bgCanvas.animations.alpha, timingFuc: this.bgCanvas.timingFuctions.linear(-0.01, 1) },
+                { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0, dir) }
+          ]}
+          );
         }
 
         console.log('Hitted:', parentObject.name);
@@ -319,7 +398,15 @@ Game.prototype = {
           }, 1000);
         } else if (parentObject.name == 'back') {
           setTimeout(function() {
-            self.fsm.exitAbout();
+            if (self.fsm.current == 'about') {
+              self.fsm.exitAbout();
+            } else if (self.fsm.current == 'score') {
+              self.fsm.returnHome(); 
+            }
+          }, 1000);
+        } else if (parentObject.name == 'retry') {
+          setTimeout(function() {
+            self.fsm.retryGame();
           }, 1000);
         }
       }
@@ -443,12 +530,12 @@ Game.prototype = {
     if (this.fsm.current != 'game') { 
       return;
     }
-    if (this.bgCanvas.time == 0) {
-      this.fsm.exitGame();
+    if (this.time.number == 0) {
+      this.fsm.endGame();
     }
-    console.log(123)
     var self = this;
-    this.bgCanvas.updateTime();
+    this.time.sub(1);
+    this.bgCanvas.layers[3].needUpdate = true;
     setTimeout(function() {self._updateTime();}, 1000);
   },
 
