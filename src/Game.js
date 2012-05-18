@@ -427,7 +427,7 @@ Game.prototype = {
     if (ran < 1) {
       var fruit = new Fruit(self.loader, 'apple');
     } else if (ran < 2) {
-      var fruit = new Fruit(self.loader, 'orange');
+      var fruit = new Fruit(self.loader, 'banana');
     } else if (ran < 3) {
       var fruit = new Fruit(self.loader, 'watermelon');
     }

@@ -1,14 +1,14 @@
 JuiceParticleSystem = function(x, y, dir, fruit, hasBigJuice) {
   var particles = new THREE.Geometry(),
-      map = {
-        'apple': 'images/particles/p_big_juice.png',
-        'kiwi': 'images/particles/k_big_juice.png',
-        'lemon': 'images/particles/p_big_juice.png',
-        'orange': 'images/particles/o_big_juice.png',
-        'watermelon': 'images/particles/w_big_juice.png',
-        'pear': 'images/particles/p_big_juice.png',
-        'pineapple': 'images/particles/p_big_juice.png',
-      }   
+  map = {
+    'apple': 'images/particles/p_big_juice.png',
+    'kiwi': 'images/particles/k_big_juice.png',
+    'lemon': 'images/particles/p_big_juice.png',
+    'orange': 'images/particles/o_big_juice.png',
+    'watermelon': 'images/particles/w_big_juice.png',
+    'pear': 'images/particles/p_big_juice.png',
+    'pineapple': 'images/particles/p_big_juice.png',
+  }   
   pMaterial = 
     new THREE.ParticleBasicMaterial({
     color: 0xFFFFFF,

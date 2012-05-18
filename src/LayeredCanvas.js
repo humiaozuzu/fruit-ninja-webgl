@@ -201,3 +201,77 @@ function LayeredCanvas(n, width, height) {
   };
 
 }
+
+new Layer(0, 0, 'static', 'global', [
+  { image: loader.images['bg1'], x: 0, y: 0, noShortCut: true}
+]);
+
+function Layer(width, height, type, scope, options) {
+  this.type = type;
+  this.scope = scope;
+  this.options = options;
+  this.needUpdate = true;
+  this.lastScene = 'nothing';
+
+  this.canvas = document.createElement('canvas');
+  this.context = this.canvas.getContext('2d');
+  this.canvas.width = this.width = width;
+  this.canvas.height = this.height = height;
+
+  this.add = function(texture) {
+    this.options.push(texture); 
+    this.needUpdate = true;
+  };
+
+  this.remove = function(texture) {
+    var i = this.options(texture);
+    if (i !== -1) {
+      this.options.splice(i, 1);
+    }
+  }
+
+  this.update = function(sceneName) {
+    if (this.lastScene == sceneName) {
+      this.needUpdate = true;
+    }
+
+    if (this.type == 'static' && this.needUpdate == true) {
+      if (this.scope == 'global') {
+        // update each texture to canvas
+        for (var i; i < this.options.length; i++) {
+          var texture = this.options[i]; 
+          if (texture.noShortCut) {
+            this.context.drawImage(texture.image, texture.x, texture.y);
+          } else {
+            this.context.drawImage(texture.image, this._canvasX(texture.x) - texture.image.width/2 , this._canvasY(texture.y) - texture.image.height/2);
+          }
+        }
+      } else if (scope == 'sceneBased') {
+        // TODO
+      }
+      this.needUpdate = false;
+    } else if (this.type == 'animated') {
+      if (this.scope == 'global') {
+        // update each animated texture to canvas
+        for (var i; i < this.options.length; i++) {
+          var texture = this.options[i]; 
+          this.context.save();
+          this.context.translate(this._canvasX(texture.x) - texture.image.width/2, this._canvasY(texture.y) - texture.image.height/2);
+          for (var j = 0; j < texture.animations.length; j++) {
+            texture.animations[j].animateFuc(this.contexts, texture.image, texture.animations[j].timingFuc());
+          }
+          this.contexts[2].drawImage(texture.image, 0, 0);
+          this.contexts[2].restore();
+        }
+      } 
+    };
+    this.lastScene = sceneName;
+
+    this._canvasX = function(x) {
+      return x + this.width/2;
+    };
+
+    this._canvasY = function(y) {
+      return -y + this.height/2;
+  };
+}
