@@ -92,17 +92,17 @@ Game.prototype = {
       paused: []
     });
 
-    this.gametime = 3;
+    this.gametime = 20;
     console.log('Initializing Canvas for game!')
     //this.bgCanvas.init(this.loader, 2);
     // background image
-    this.bgCanvas.addLayer('static', 'global', [
+    this.bgCanvas.addLayer('static', 'global', 'bg', [
                            { image: this.loader.images['bg1'], x: 0, y: 0, noShortCut: true}
     ]);
     // slashed juice
-    this.bgCanvas.addLayer('animated', 'global', []);
+    this.bgCanvas.addLayer('animated', 'global', 'slash', []);
     // scene-based rotating circle
-    this.bgCanvas.addLayer('animated', 'sceneBased', {
+    this.bgCanvas.addLayer('animated', 'sceneBased', 'circle', {
       home: [
         {image: this.loader.images['game'], x: 0, y: 0, animations: [
           { animateFuc: this.bgCanvas.animations.rotate, timingFuc: this.bgCanvas.timingFuctions.linear(0.02, 0) },
@@ -130,12 +130,16 @@ Game.prototype = {
     });
     this.score = new CanvasNumber(this.loader, 0);
     this.time = new CanvasNumber(this.loader, this.gametime);
-    this.bgCanvas.addLayer('static', 'sceneBased', {
+    this.bgCanvas.addLayer('static', 'sceneBased', 'score', {
       game: [
         {image: this.loader.images['pause'], x: -600, y: -450},
         {image: this.loader.images['score'], x: 0, y: 0, noShortCut: true},
         {image: this.score.canvas, x: 64, y: 10, noShortCut: true},
         {image: this.time.canvas, x: 640, y: 440 }
+      ],
+      score: [
+        {image: this.loader.images['score2'], x: 300, y: 250, noShortCut: true},
+        {image: this.score.canvas, x: 300, y: 200, noShortCut: true},
       ],
     });
     this.loadPausedFrame();

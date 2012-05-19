@@ -7,7 +7,7 @@ function UIManager(scene) {
     console.log(options);
 
     for (uiName in options) {
-      console.log('Creating UI for:', uiName);
+      console.log('UIManager.js:', 'Creating UI for:', uiName);
       // create Object3D that holds fruits
       this.ui[uiName] = new THREE.Object3D();
 
@@ -19,7 +19,9 @@ function UIManager(scene) {
       // reset current ui
       this.reset(uiName);
     }
-    console.log('All UI created successfully:', this.ui);
+
+    console.log('UIManager.js:', 'All UI created successfully.');
+    console.log('\tDS:', this.ui);
   };
 
   this.add = function(name) {
@@ -34,8 +36,9 @@ function UIManager(scene) {
  * Reset all fruit in ui
  */
   this.reset = function(uiName) {
-    console.log('Resetting UI:', uiName);
-    console.log(this.options[uiName]);
+    console.log('UIManager.js:', 'Resetting UI', uiName);
+    console.log('\tDS:', this.options[uiName]);
+
     if (uiName == 'game') {
       this.ui[uiName].children = [];
     }

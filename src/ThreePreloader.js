@@ -23,7 +23,8 @@ function ThreePreloader(options) {
 
     // load images
     for (var imageName in this.options.images) {
-      console.log('Loading:', this.options.images[imageName]);
+      console.log('ThreePreloader.js:', 'Loading', this.options.images[imageName]);
+
       var image = new Image();
       image.onload = (function(imageName, image) {
         return function(){
@@ -36,7 +37,8 @@ function ThreePreloader(options) {
 
     // load models
     for (var objectName in this.options.objects) {
-      console.log('Loading:', this.options.objects[objectName]);
+      console.log('ThreePreloader.js:', 'Loading', this.options.objects[objectName]);
+
       var loader = new THREE.JSONLoader();
       loader.load(this.options.objects[objectName], function(objectName) {
         return function(geometry) {

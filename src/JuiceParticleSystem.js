@@ -1,4 +1,6 @@
 JuiceParticleSystem = function(x, y, dir, fruit, hasBigJuice) {
+  console.log('JuiceParticleSystem.js:', 'Initializing particle system for', fruit);
+  console.log('\tDS:', this);
   var particles = new THREE.Geometry(),
   map = {
     'apple': 'images/particles/p_big_juice.png',

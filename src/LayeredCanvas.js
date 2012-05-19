@@ -114,11 +114,13 @@ function LayeredCanvas(width, height) {
   this.mainContext = this.mainCanvas.getContext('2d');
   this.mainCanvas.width = this.width = width;
   this.mainCanvas.height = this.height = height;
+  this.counter = 0;
   this.rate = 2;
   this.layers = [];
 
-  this.addLayer = function(type, scope, options) {
+  this.addLayer = function(type, scope, alias, options) {
     this.layers.push(new Layer(1280, 960, type, scope, options));    
+    this.layers[alias] = this.layers[this.layers.length - 1];
   };
 
   this.addNotice = function(name) {
@@ -156,11 +158,11 @@ function LayeredCanvas(width, height) {
     if (this.counter % this.rate == 0) {
       return;
     }
+
     for (var i = 0; i < this.layers.length; ++i) {
       this.layers[i].update(sceneName);
       this.mainContext.drawImage(this.layers[i].canvas, 0, 0, this.mainCanvas.width, this.mainCanvas.height);
     }
-    this.needUpdate = true;
   }; 
 
   this._canvasX = function(x) {

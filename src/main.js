@@ -24,6 +24,7 @@ window.onload = function() {
  * callback function that start the game with screen size and loaded resouces
  */
   function startGame() {
+    $(loadingScene).remove();
     var opts = {
       width: width,
       height: height,
@@ -40,6 +41,29 @@ window.onload = function() {
  */
   function showProgress(total, loaded) {
     console.log(loaded+'/'+total);
+    $(messageBox).text(Math.round(loaded/total*100)+'%');
+  }
+
+  var loadingScene = $('<div>').attr('id', 'loading');
+  var messageBox = $('<div>').attr('id', 'message');
+  function addLoadingScene() {
+    $(loadingScene).css({
+      'position': 'absolute',
+      'width': '100%',
+      'height': '100%',
+      'z-index': '100000',
+      'background-color': 'rgba(0, 0, 0, 0.6)',
+    });
+    $(messageBox).css({
+      'width': '40%',
+      'padding-top': '20%',
+      'padding-left': '20%',
+      'padding-right': '20%',
+      'font': '10em sans-serif',
+      'color': 'white',
+    });
+    $(loadingScene).append(messageBox);
+    $('body').append(loadingScene);
   }
 
   // initialize the prelaoder with resouces paths
@@ -59,6 +83,7 @@ window.onload = function() {
       retry: 'images/retry_button.png',
       numbers: 'images/arcade_numbers.png',
       score: 'images/hud_fruit.png',
+      score2: 'images/score.png',
       time: 'images/arcade_60.png',
       go: 'images/arcade_go.png',
       splashOrange1: 'images/juice/orange1.png',
@@ -68,20 +93,20 @@ window.onload = function() {
       splashRed1: 'images/juice/red1.png',
       splashRed2: 'images/juice/red2.png',
       // textures for 3d objects
-      apple1: 'models/apple/apple_skin.jpg',
-      apple2: 'models/apple/apple_stem.jpg',
-      apple3: 'models/apple/apple_half.jpg',
-      banana1: 'models/banana/banana_skin.jpg',
-      banana2: 'models/banana/banana_half.jpg',
-      watermelon1 : 'models/watermelon/watermelon_skin.jpg',
-      watermelon2 : 'models/watermelon/watermelon_half.jpg',
-      kiwi1: 'models/kiwi/kiwi_skin.jpg',
-      kiwi2: 'models/kiwi/kiwi_half.jpg',
-      lemon1: 'models/lemon/lemon_skin.jpg',
-      lemon2: 'models/lemon/lemon_half.jpg',
-      orange1: 'models/orange/orange_skin.jpg',
-      orange2: 'models/orange/orange_half.jpg',
-      orange3: 'models/orange/orange_stem.jpg',
+      //apple1: 'models/apple/apple_skin.jpg',
+      //apple2: 'models/apple/apple_stem.jpg',
+      //apple3: 'models/apple/apple_half.jpg',
+      //banana1: 'models/banana/banana_skin.jpg',
+      //banana2: 'models/banana/banana_half.jpg',
+      //watermelon1 : 'models/watermelon/watermelon_skin.jpg',
+      //watermelon2 : 'models/watermelon/watermelon_half.jpg',
+      //kiwi1: 'models/kiwi/kiwi_skin.jpg',
+      //kiwi2: 'models/kiwi/kiwi_half.jpg',
+      //lemon1: 'models/lemon/lemon_skin.jpg',
+      //lemon2: 'models/lemon/lemon_half.jpg',
+      //orange1: 'models/orange/orange_skin.jpg',
+      //orange2: 'models/orange/orange_half.jpg',
+      //orange3: 'models/orange/orange_stem.jpg',
       // textures particle systems
       watermelonJuice: 'images/particles/w_big_juice.png',
       kiwiJuice: 'images/particles/k_big_juice.png',
@@ -93,6 +118,8 @@ window.onload = function() {
     objects: {
       apple1: 'models/apple/apple_half1.js',
       apple2: 'models/apple/apple_half2.js',
+      //pear1: 'models/pear/pear_half1.js',
+      //pear2: 'models/pear/pear_half2.js',
       banana1: 'models/banana/banana_half1.js',
       banana2: 'models/banana/banana_half2.js',
       watermelon1 : 'models/watermelon/watermelon_half1.js',
@@ -109,4 +136,5 @@ window.onload = function() {
     onProgress: showProgress
   });
   loader.load();
+  addLoadingScene();
 };

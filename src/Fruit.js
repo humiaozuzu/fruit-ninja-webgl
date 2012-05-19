@@ -3,6 +3,8 @@ function Fruit(loader, kind, name) {
  * A Fruit object consists of 2 half-fruit models, when this class is initialized,
  * two half-fruit mesh are added into one Object3D.
  */
+  console.log('Fruit.js:', 'Initializing fruit', kind);
+  console.log('\tDS:', this);
   THREE.Object3D.call(this);
   var object1 = new THREE.Mesh(loader.objects[kind+'1'], new THREE.MeshFaceMaterial());
   var object2 = new THREE.Mesh(loader.objects[kind+'2'], new THREE.MeshFaceMaterial());
@@ -25,7 +27,7 @@ Fruit.prototype.constructor = Fruit;
 Fruit.prototype.update = function() {
   if (!this.sliced) {
     this.rotation.addSelf(this.rotationDelta);
-    if (this.velocity) {
+    if (this.velocity !== undefined) {
       this.position.addSelf(this.velocity);
       this.velocity.y -= 9.8 / 30;
     }
@@ -43,9 +45,15 @@ Fruit.prototype.update = function() {
  * Reset velocity/position of fruit and its composed half
  */
 Fruit.prototype.reset = function() {
+  console.log('Fruit.js:', 'Reseting fruit', this.kind);
+  console.log('\tDS:', this);
   this.sliced = false;
+
+  // reset fruit itself
   this.position.set(0, 0, 100);
   this.velocity = undefined;
+
+  // reset children
   this.children.forEach(function(fruit) {
     fruit.position.set(0, 0, 0);
     fruit.rotation.set(0, 0, 0);
@@ -58,6 +66,8 @@ Fruit.prototype.reset = function() {
  * Otherwise, drop the complete fruit.
  */
 Fruit.prototype.drop = function(sliced, direction) {
+  console.log('Fruit.js:', 'Dropping fruit', this.kind);
+  console.log('\tDS:', this);
   if (sliced) {
     this.sliced = true;
     var x = this.rotation.x % (Math.PI * 2);
@@ -85,9 +95,9 @@ Fruit.prototype.drop = function(sliced, direction) {
           fruit.parent.kind == 'watermelon' || 
           fruit.kind == 'orange') 
       {
-        fruit.rotation.z = -direction + Math.PI / 2 + Math.PI / 2 * counter;
+        fruit.rotation.z = -direction + Math.PI/2;
       } else {
-        fruit.rotation.z = direction;
+        fruit.rotation.z = -direction;
       }
 
       fruit.rotationDelta = new THREE.Vector3(0, Math.random() * 0.2 - 0.1, 0);
