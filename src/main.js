@@ -1,8 +1,7 @@
 /*
- * Main function that dectect screen size, preload resouces and init the game
+ * Main function that dectect screen size, preload resouces and init the game.
  */
-
-window.onload = function() {
+$(document).ready(function() {
   // check browser webgl support
   if (!Detector.webgl) {
     Detector.addGetWebGLMessage();
@@ -17,7 +16,7 @@ window.onload = function() {
     width = height * aspect;
   } else {
     width -= 40;
-    height = width / aspect -20;
+    height = width / aspect - 20;
   }
 
 /*
@@ -40,8 +39,8 @@ window.onload = function() {
  * Callback function that showing the progress of loading resouces
  */
   function showProgress(total, loaded) {
-    console.log(loaded+'/'+total);
-    $(messageBox).text(Math.round(loaded/total*100)+'%');
+    console.log(loaded + '/' + total);
+    $(messageBox).text(Math.round(loaded / total * 100) + '%');
   }
 
   var loadingScene = $('<div>').attr('id', 'loading');
@@ -52,7 +51,7 @@ window.onload = function() {
       'width': '100%',
       'height': '100%',
       'z-index': '100000',
-      'background-color': 'rgba(0, 0, 0, 0.6)',
+      'background-color': 'rgba(0, 0, 0, 0.6)'
     });
     $(messageBox).css({
       'width': '40%',
@@ -60,7 +59,7 @@ window.onload = function() {
       'padding-left': '20%',
       'padding-right': '20%',
       'font': '10em sans-serif',
-      'color': 'white',
+      'color': 'white'
     });
     $(loadingScene).append(messageBox);
     $('body').append(loadingScene);
@@ -72,11 +71,11 @@ window.onload = function() {
       // textures for 2d canvas
       bg1: 'images/bg_i_heart_sensei_1280_960.jpg',
       bg2: 'images/bg_store_1280_960.jpg',
-      game: 'images/ring_start.png',
-      about: 'images/ring_about.png',
-      swag: 'images/ring_senseis_swag.png',
-      back: 'images/ring_back.png',
-      retry2: 'images/ring_retry.png',
+      gameRing: 'images/ring/ring_start.png',
+      aboutRing: 'images/ring/ring_about.png',
+      swagRing: 'images/ring/ring_senseis_swag.png',
+      backRing: 'images/ring/ring_back.png',
+      retryRing: 'images/ring/ring_retry.png',
       quit: 'images/quit_button.png',
       pause: 'images/pause_button.png',
       play: 'images/play_button.png',
@@ -113,7 +112,7 @@ window.onload = function() {
       orangeJuice: 'images/particles/o_big_juice.png',
       pearJuice: 'images/particles/p_big_juice.png',
       mangoJuice: 'images/particles/m_big_juice.png',
-      orangeJuice: 'images/particles/o_big_juice.png',
+      orangeJuice: 'images/particles/o_big_juice.png'
     },
     objects: {
       apple1: 'models/apple/apple_half1.js',
@@ -122,14 +121,14 @@ window.onload = function() {
       //pear2: 'models/pear/pear_half2.js',
       banana1: 'models/banana/banana_half1.js',
       banana2: 'models/banana/banana_half2.js',
-      watermelon1 : 'models/watermelon/watermelon_half1.js',
-      watermelon2 : 'models/watermelon/watermelon_half2.js',
+      watermelon1: 'models/watermelon/watermelon_half1.js',
+      watermelon2: 'models/watermelon/watermelon_half2.js',
       kiwi1: 'models/kiwi/kiwi_half1.js',
       kiwi2: 'models/kiwi/kiwi_half2.js',
       lemon1: 'models/lemon/lemon_half1.js',
       lemon2: 'models/lemon/lemon_half2.js',
       orange1: 'models/orange/orange_half1.js',
-      orange2: 'models/orange/orange_half2.js',
+      orange2: 'models/orange/orange_half2.js'
     },
     sounds: {},
     onSuccess: startGame,
@@ -137,4 +136,4 @@ window.onload = function() {
   });
   loader.load();
   addLoadingScene();
-};
+});

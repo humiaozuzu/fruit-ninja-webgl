@@ -1,9 +1,9 @@
-/*
- * Resource preloader for fruit-ninja-webgl, mainly preload images, 
- * sounds and json fruit models for the game. 
- */
-
 function ThreePreloader(options) {
+/**
+ * Resource preloader for fruit-ninja-webgl, mainly preload images,
+ * sounds and json fruit models for the game.
+ * @param {Object} options image/sound/json file paths.
+ */
   this.options = options;
   this.images = {};
   this.objects = {};
@@ -12,7 +12,7 @@ function ThreePreloader(options) {
   this.totalCount = 0;
 
 /*
- * Load all resources with the paramenter with options parameter
+ * Start loading all resources.
  */
   this.load = function() {
     var self = this;
@@ -23,12 +23,14 @@ function ThreePreloader(options) {
 
     // load images
     for (var imageName in this.options.images) {
-      console.log('ThreePreloader.js:', 'Loading', this.options.images[imageName]);
+      console.log('ThreePreloader.js:',
+                  'Loading',
+                  this.options.images[imageName]);
 
       var image = new Image();
       image.onload = (function(imageName, image) {
-        return function(){
-          self.images[imageName] = image; 
+        return function() {
+          self.images[imageName] = image;
           self.loaded();
         };
       })(imageName, image);
@@ -37,7 +39,9 @@ function ThreePreloader(options) {
 
     // load models
     for (var objectName in this.options.objects) {
-      console.log('ThreePreloader.js:', 'Loading', this.options.objects[objectName]);
+      console.log('ThreePreloader.js:',
+                  'Loading',
+                  this.options.objects[objectName]);
 
       var loader = new THREE.JSONLoader();
       loader.load(this.options.objects[objectName], function(objectName) {
@@ -51,7 +55,8 @@ function ThreePreloader(options) {
 
 /*
  * When an image/json/sound is loaded, this function is called to
- * calculate loaded resources count and invoke callback functions
+ * calculate loaded resources count and invoke onProgress function.
+ * If all resources loaded, call the onSuccess function.
  */
   this.loaded = function() {
     this.loadedCount += 1;

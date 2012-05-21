@@ -11,16 +11,16 @@ function Layer(width, height, type, scope, options) {
   this.canvas.height = this.height = height;
 
   this.add = function(texture) {
-    this.options.push(texture); 
+    this.options.push(texture);
     this.needUpdate = true;
   };
 
   this.remove = function(texture) {
     var i = this.options.indexOf(texture);
-    console.log('iiiii', i)
+    console.log('iiiii', i);
     if (i !== -1) {
       this.options.splice(i, 1);
-      console.log(this.options)
+      console.log(this.options);
     }
   }
 
@@ -36,21 +36,21 @@ function Layer(width, height, type, scope, options) {
       if (this.scope == 'global') {
         // update each texture to canvas
         for (var i = 0; i < this.options.length; i++) {
-          var texture = this.options[i]; 
+          var texture = this.options[i];
           if (texture.noShortCut) {
             this.context.drawImage(texture.image, texture.x, texture.y);
           } else {
-            this.context.drawImage(texture.image, this._canvasX(texture.x) - texture.image.width/2 , this._canvasY(texture.y) - texture.image.height/2);
+            this.context.drawImage(texture.image, this._canvasX(texture.x) - texture.image.width / 2 , this._canvasY(texture.y) - texture.image.height / 2);
           }
         }
       } else if (scope == 'sceneBased' && options.hasOwnProperty(sceneName)) {
         // update each texture to canvas
         for (var i = 0; i < this.options[sceneName].length; i++) {
-          var texture = this.options[sceneName][i]; 
+          var texture = this.options[sceneName][i];
           if (texture.noShortCut) {
             this.context.drawImage(texture.image, texture.x, texture.y);
           } else {
-            this.context.drawImage(texture.image, this._canvasX(texture.x) - texture.image.width/2 , this._canvasY(texture.y) - texture.image.height/2);
+            this.context.drawImage(texture.image, this._canvasX(texture.x) - texture.image.width / 2 , this._canvasY(texture.y) - texture.image.height / 2);
           }
         }
         // TODO
@@ -60,35 +60,35 @@ function Layer(width, height, type, scope, options) {
       if (this.scope == 'global') {
         // update each animated texture to canvas
         for (var i = 0; i < this.options.length; i++) {
-          var texture = this.options[i]; 
+          var texture = this.options[i];
           if (texture.frame != undefined) {
             if (texture.frame == 0) {
-              this.remove(texture); 
+              this.remove(texture);
               i -= 1;
             }
             texture.frame -= 1;
           }
           this.context.save();
-          this.context.translate(this._canvasX(texture.x) - texture.image.width/2, this._canvasY(texture.y) - texture.image.height/2);
+          this.context.translate(this._canvasX(texture.x) - texture.image.width / 2, this._canvasY(texture.y) - texture.image.height / 2);
           for (var j = 0; j < texture.animations.length; j++) {
             texture.animations[j].animateFuc(this.context, texture.image, texture.animations[j].timingFuc());
           }
           this.context.drawImage(texture.image, 0, 0);
           this.context.restore();
         }
-      }  else if (scope == 'sceneBased' && options.hasOwnProperty(sceneName)) {
+      } else if (scope == 'sceneBased' && options.hasOwnProperty(sceneName)) {
         // update each animated texture to canvas
         for (var i = 0; i < this.options[sceneName].length; i++) {
-          var texture = this.options[sceneName][i]; 
+          var texture = this.options[sceneName][i];
           if (texture.frame != undefined) {
             if (texture.frame == 0) {
-              this.remove(texture); 
+              this.remove(texture);
               i -= 1;
             }
             texture.frame -= 1;
           }
           this.context.save();
-          this.context.translate(this._canvasX(texture.x) - texture.image.width/2, this._canvasY(texture.y) - texture.image.height/2);
+          this.context.translate(this._canvasX(texture.x) - texture.image.width / 2, this._canvasY(texture.y) - texture.image.height / 2);
           for (var j = 0; j < texture.animations.length; j++) {
             texture.animations[j].animateFuc(this.context, texture.image, texture.animations[j].timingFuc());
           }
@@ -96,16 +96,16 @@ function Layer(width, height, type, scope, options) {
           this.context.restore();
         }
       }
-    };
+    }
     this.lastScene = sceneName;
   };
 
   this._canvasX = function(x) {
-    return x + this.width/2;
+    return x + this.width / 2;
   };
 
   this._canvasY = function(y) {
-    return -y + this.height/2;
+    return -y + this.height / 2;
   };
 }
 
@@ -119,13 +119,13 @@ function LayeredCanvas(width, height) {
   this.layers = [];
 
   this.addLayer = function(type, scope, alias, options) {
-    this.layers.push(new Layer(1280, 960, type, scope, options));    
+    this.layers.push(new Layer(1280, 960, type, scope, options));
     this.layers[alias] = this.layers[this.layers.length - 1];
   };
 
   this.addNotice = function(name) {
     this.juice.push({image: this.loader.images[name], x: 0, y: 0, animations: [
-                    { animateFuc: this.animations.alpha, timingFuc: this.timingFuctions.linear(-0.02, 1) },
+                    { animateFuc: this.animations.alpha, timingFuc: this.timingFuctions.linear(-0.02, 1) }
     ]});
   };
 
@@ -139,7 +139,7 @@ function LayeredCanvas(width, height) {
       ctx.translate(image.width / 2 , image.height / 2);
       ctx.rotate(angle);
       ctx.translate(-image.width / 2 , -image.height / 2);
-    },
+    }
 
   };
 
@@ -148,9 +148,9 @@ function LayeredCanvas(width, height) {
       var counter = 0;
       return function() {
         counter += 1;
-        return k*counter + b;
+        return k * counter + b;
       };
-    },
+    }
   };
 
   this.update = function(sceneName, freq) {
@@ -163,14 +163,14 @@ function LayeredCanvas(width, height) {
       this.layers[i].update(sceneName);
       this.mainContext.drawImage(this.layers[i].canvas, 0, 0, this.mainCanvas.width, this.mainCanvas.height);
     }
-  }; 
+  };
 
   this._canvasX = function(x) {
-    return x + this.width/2;
+    return x + this.width / 2;
   };
 
   this._canvasY = function(y) {
-    return -y + this.height/2;
+    return -y + this.height / 2;
   };
 }
 

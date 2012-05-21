@@ -26,14 +26,14 @@ function UIManager(scene) {
 
   this.add = function(name) {
     this.scene.add(this.ui[name]);
-  }; 
+  };
 
   this.remove = function(name) {
     this.scene.remove(this.ui[name]);
   };
 
 /*
- * Reset all fruit in ui
+ * Reset all fruit in ui.
  */
   this.reset = function(uiName) {
     console.log('UIManager.js:', 'Resetting UI', uiName);
@@ -47,12 +47,12 @@ function UIManager(scene) {
       object.reset();
       object.position.copy(this.options[uiName][i].position);
       if (this.options[uiName][i].rotation) {
-        object.rotation.copy(this.options[uiName][i].rotation)
+        object.rotation.copy(this.options[uiName][i].rotation);
       }
       //console.log(this.options[uiName][i]['position']);
       //console.log(object)
       object.rotationDelta.copy(this.options[uiName][i].rotationDelta);
-      if (this.options[uiName][i].eulerOrder) {
+      if (this.options[uiName][i].eulerOrder != undefined) {
         object.eulerOrder = this.options[uiName][i].eulerOrder;
       }
     }
@@ -65,11 +65,11 @@ function UIManager(scene) {
   };
 
   this.getIntersectionList = function(uiName) {
-    var intersectList = []; 
+    var intersectList = [];
 
     this.ui[uiName].children.forEach(function(fruit) {
       if (!fruit.sliced) {
-        intersectList = intersectList.concat(fruit.children); 
+        intersectList = intersectList.concat(fruit.children);
       }
     });
     return intersectList;
